@@ -1,0 +1,33 @@
+---
+import type { CommentairesResponse, UsersResponse } from '../pocketbase-types'
+import ProgressBar from './Progress_bar.astro';
+
+type CommentaireWithUser = CommentairesResponse & {
+    expand?: {
+        user?: UsersResponse;
+    };
+};
+
+interface Props {
+    com: CommentaireWithUser;
+}
+const { com } = Astro.props
+---
+<div class="">
+    {/* espace du haut */}
+    <div>
+        {/* Nom & statut */}
+        <div>
+            <a href="">{com.expand?.user?.name}</a>
+            {
+                com.expand?.user?.coach ? (
+                <p>membre</p>
+                ):(
+                <p>coach</p>
+                )
+            }
+        </div>
+        <ProgressBar note={com.note} />
+    </div>
+    <p>{com.contenu}</p>
+</div>

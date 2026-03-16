@@ -187,6 +187,7 @@ export type IngredientsDansRecetteRecord = {
 export type UsersRecord = {
 	admin?: boolean
 	avatar?: FileNameString
+	coach?: boolean
 	created: IsoAutoDateString
 	email: string
 	emailVisibility?: boolean

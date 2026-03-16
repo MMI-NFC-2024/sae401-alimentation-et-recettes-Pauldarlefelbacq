@@ -19,7 +19,7 @@ const moyenne = commentaires.length > 0
 const nb_com = commentaires.length;
 ---
 <a href=`/recettes/${recette.id}`
-    class="bg-beige w-fit h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto"
+    class="bg-beige w-100 h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto"
 >
     <div class="m-1.5 *:my-1.5">
         <p class="font-rampart text-2xl text-bleu">{ recette.titre }</p>
@@ -30,13 +30,19 @@ const nb_com = commentaires.length;
         <Button texte={recette.type} />
         <div>
             <p>{ nb_com } avis</p>
-            <div class="flex place-items-center justify-around *:mx-1.5">
+            <div class="flex place-items-center justify-around *:mx-1.5 ">
                 <ProgressBar note={moyenne}/>
                 <p>{ moyenne }/5</p>
             </div>
         </div>
     </div>
-    <div>
-        <ImgPb record={recette} image={recette.image} alt=`image de ${recette.titre}` class:list={"size-24 rounded-r-[10px]"} />
+    <div class="h-full">
+        <ImgPb
+            record={recette}
+            image={recette.image}
+            alt={`image de ${recette.titre}`}
+            classPicture="w-full h-full"
+            classImg="w-full h-full object-cover"
+        />
     </div>
 </a>

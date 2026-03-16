@@ -1,14 +1,28 @@
 ---
 import CardRecette from "../../components/Card_recette.astro";
 import Layout from "../../layouts/Layout.astro";
-const prerender = false;
+import { RecettesTypeOptions } from "../../pocketbase-types";
+export const prerender = false;
 
 const recettes = await Astro.locals.pb.collection("Recettes").getFullList();
+const categories = Object.values(RecettesTypeOptions);
 ---
 <Layout titre="Recettes">
-    <h1>Recettes</h1>
-    Card recettes
-     <ul class="grid grid-cols-1 place-self-center justify-self-center ">
+    <h1 class="mt-20">Recettes</h1>
+    <input type="text" class="grid w-2/3 border-2 border-bleu rounded-lg bg-white my-5 mx-auto px-2 py-1 font-comforta" placeholder="Rechercher">
+    <div class="mx-auto w-fit">
+        {
+        categories.map((cat) => (
+            <a
+            href=""
+            class="bg-bleu text-beige font-bold p-2.5 rounded-full mx-2.5 border hover:bg-beige hover:text-bleu transition-all duration-100"
+            >
+                {cat}
+            </a>
+        ))
+        }
+    </div>
+     <ul class="grid grid-cols-1 place-self-center justify-self-center *:my-10">
         {recettes.map((recette) => (
             <li class="place-self-center justify-self-center mx-auto"><CardRecette recette={recette} /></li>
         ))} 

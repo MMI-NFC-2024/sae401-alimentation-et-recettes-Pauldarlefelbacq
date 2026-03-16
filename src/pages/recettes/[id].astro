@@ -1,3 +1,139 @@
 ---
+import ImgPb from "../../components/ImgPb.astro";
+import Layout from "../../layouts/Layout.astro";
+import Button from '../../components/Button.astro';
+import Moins from "../../assets/moins.svg";
+import Plus from "../../assets/plus.svg";
+
+import { formatHeure, checkHeure } from "../../utils/helper";
+import type { UsersResponse, CommentairesResponse, RecettesResponse, IngredientsDansRecetteResponse, IngredientsResponse } from "../../pocketbase-types";
+import CardCommentaire from "../../components/CardCommentaire.astro";
+export const prerender = false;
+
+type RecetteWithUser = RecettesResponse & {
+  expand?: {
+    user?: UsersResponse;
+  };
+};
+
+type IngredientDansRecetteWithExpand = IngredientsDansRecetteResponse & {
+  expand?: {
+    ingredient?: IngredientsResponse;
+  };
+};
+
+type CommentaireWithUser = CommentairesResponse & {
+    expand?: {
+        user?: UsersResponse;
+    };
+};
+
+// Recette
+const { id } = Astro.params as { id: string };
+const recette = await Astro.locals.pb.collection("Recettes").getOne<RecetteWithUser>(id,{
+    expand: 'user',
+});
+const auteur = await Astro.locals.pb.collection("users").getOne(recette.user);
+
+// Comm
+const commentaires = await Astro.locals.pb.collection("Commentaires").getFullList<CommentaireWithUser>({
+    filter: `recette = "${recette.id}"`,
+    expand: 'user',
+})
+
+// Ingrédients
+const ingredients = await Astro.locals.pb.collection("ingredients_dans_recette").getFullList<IngredientsDansRecetteResponse>({
+    filter: `recette = "${recette.id}"`,
+    expand: 'ingredient'
+})
+
+const nb_com = commentaires.length;
 
 ---
+<Layout titre={recette.titre}>
+    <h1>{ recette.titre }</h1>
+    <section class="justify-items-end place-self-center grid w-9/10 mx-auto">
+        <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5">Recette proposée par <a href="" class="text-bleu underline active:text-vert hover:text-black">{auteur.name}</a></p>
+        <ImgPb 
+            record={recette}
+            image={recette.image}
+            alt={`image de ${recette.titre}`}
+            classPicture="w-full h-full mx-auto"
+            classImg="w-full h-full object-cover rounded-xl"/>
+    </section>
+    <section class="flex place-items-center justify-around">
+        <Button texte={recette.type}/>
+        <a href="#commentaire" class="text-bleu font-bold underline">{nb_com} avis</a>
+    </section>
+    <section class="flex place-items-center justify-around bg-beige border border-bleu rounded-xl">
+        <div>
+            <div>
+                Cuisson
+            </div>
+            <div class="flex">
+                <p>{formatHeure(recette.temps_cuisson)}</p>
+                {checkHeure(recette.temps_cuisson) ? (
+                    <p>h</p>
+                ):(
+                    <p>mins</p>
+                )}
+            </div>
+        </div>
+        <div>
+            <div>
+                Préparation
+            </div>
+            <div class="flex">
+                <p>{formatHeure(recette.temps_prep)}</p>
+                {checkHeure(recette.temps_prep) ? (
+                    <p>h</p>
+                ):(
+                    <p>mins</p>
+                )}
+            </div>
+        </div>
+    </section>
+    <section>
+        <h2>Description</h2>
+        <p>{recette.description}</p>
+    </section>
+    <section>
+        <div>
+            <div>
+                <h2>Ingrédients</h2>
+                <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
+                    <button><Moins /></button>
+                    <button class="bg-bleu text-beige h-full">{recette.nb_personnes} personnes</button>
+                    <button><Plus /></button>
+                </div>
+            </div>
+            <ul class="grid grid-cols-2 bg-beige">
+                {
+                    ingredients.map((ing) => (
+                        <li>{ing.expand?.ingredient?.nom}</li>
+                        <li>{ing.quantite}{ing.unite}</li>
+                    ))
+                }
+            </ul>
+        </div>
+    </section>
+    <section>
+        <h2>Préparation</h2>
+        <ul>
+            {
+
+            }
+        </ul>
+    </section>
+    <section>
+        <h2>Commentaires</h2>
+        <div>
+            {
+                commentaires.map((com) => (
+                    // card globale
+                    <CardCommentaire com={com} />
+                ))
+            }
+        </div>
+    </section>
+</Layout>
