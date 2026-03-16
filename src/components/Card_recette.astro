@@ -3,6 +3,7 @@ import type { RecettesResponse } from '../pocketbase-types'
 import { TpsTotal } from "../utils/helper";
 import Button from './Button.astro';
 import ProgressBar from './Progress_bar.astro';
+import ImgPb from './ImgPb.astro';
 
 type Props= {
     recette: RecettesResponse
@@ -10,31 +11,32 @@ type Props= {
 const recette = Astro.props.recette;
 const tps = TpsTotal(recette.temps_cuisson, recette.temps_prep);
 const commentaires = await Astro.locals.pb.collection("Commentaires").getFullList({
-    filter: `recette = ${recette.id}`
+    filter: `recette = "${recette.id}"`
 });
 const moyenne = commentaires.length > 0
-    ? commentaires.reduce((sum, r) => sum + r.note, 0) / commentaires.length
+    ? (Math.round((commentaires.reduce((sum, r) => sum + r.note, 0) / commentaires.length) * 10)) / 10
     : 0;
 const nb_com = commentaires.length;
 ---
-<a href=`/recettes/${recette.id}`>
-    <div>
+<a href=`/recettes/${recette.id}`
+    class="bg-beige w-fit h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto"
+>
+    <div class="m-1.5 *:my-1.5">
+        <p class="font-rampart text-2xl text-bleu">{ recette.titre }</p>
+        <div class="text-right">
+            <p class="text-base">Tps préparation</p>
+            <p class="text-bleu font-bold">{ tps }</p>
+        </div>
+        <Button texte={recette.type} />
         <div>
-            <p>{recette.titre}</p>
-            <div>
-                <p>Tps préparation</p>
-                <p>{tps}</p>
-            </div>
-            <Button texte={recette.type} />
-            <div>
-                <p>{ nb_com } avis</p>
-                <div>
-                    <ProgressBar note={moyenne}/>
-                </div>
+            <p>{ nb_com } avis</p>
+            <div class="flex place-items-center justify-around *:mx-1.5">
+                <ProgressBar note={moyenne}/>
+                <p>{ moyenne }/5</p>
             </div>
         </div>
     </div>
     <div>
-
+        <ImgPb record={recette} image={recette.image} alt=`image de ${recette.titre}` class:list={"size-24 rounded-r-[10px]"} />
     </div>
 </a>

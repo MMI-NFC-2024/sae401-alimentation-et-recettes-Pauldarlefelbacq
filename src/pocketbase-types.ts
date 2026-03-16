@@ -7,10 +7,10 @@ import type { RecordService } from 'pocketbase'
 
 export enum Collections {
 	Commentaires = "Commentaires",
+	EtapesPrep = "Etapes_prep",
 	Favori = "Favori",
 	Ingredients = "Ingredients",
 	Recettes = "Recettes",
-	ValeursNutritionnelles = "ValeursNutritionnelles",
 	Authorigins = "_authOrigins",
 	Externalauths = "_externalAuths",
 	Mfas = "_mfas",
@@ -50,13 +50,21 @@ export type AuthSystemFields<T = unknown> = {
 // Record types for each collection
 
 export type CommentairesRecord = {
-	contenu?: HTMLString
+	contenu?: string
 	created: IsoAutoDateString
 	id: string
 	note?: number
 	recette?: RecordIdString
 	updated: IsoAutoDateString
 	user?: RecordIdString
+}
+
+export type EtapesPrepRecord = {
+	contenu?: string
+	created: IsoAutoDateString
+	id: string
+	recette?: RecordIdString
+	updated: IsoAutoDateString
 }
 
 export type FavoriRecord = {
@@ -73,17 +81,23 @@ export enum IngredientsTypeOptions {
 	"féculent" = "féculent",
 	"sucré" = "sucré",
 	"viande" = "viande",
+	"laitage" = "laitage",
+	"condiment" = "condiment",
+	"assaisonement" = "assaisonement",
 }
 export type IngredientsRecord = {
+	calories?: number
 	created: IsoAutoDateString
+	glucides?: number
 	id: string
 	image?: FileNameString
+	mat_grasses?: number
 	nom?: string
+	proteines?: number
 	type?: IngredientsTypeOptions
 	unitaire?: boolean
 	updated: IsoAutoDateString
 	user?: RecordIdString
-	valeur_nut?: RecordIdString
 }
 
 export enum RecettesTypeOptions {
@@ -95,23 +109,14 @@ export type RecettesRecord = {
 	created: IsoAutoDateString
 	description?: string
 	id: string
+	image?: FileNameString
 	nb_personnes?: number
-	preparation?: HTMLString
 	temps_cuisson?: number
 	temps_prep?: number
 	titre?: string
 	type?: RecettesTypeOptions
 	updated: IsoAutoDateString
 	user?: RecordIdString
-}
-
-export type ValeursNutritionnellesRecord = {
-	calories?: number
-	created: IsoAutoDateString
-	id: string
-	mat_grasses?: number
-	proteines?: number
-	updated: IsoAutoDateString
 }
 
 export type AuthoriginsRecord = {
@@ -163,12 +168,19 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
+export enum IngredientsDansRecetteUniteOptions {
+	"g" = "g",
+	"c. à soupe" = "c. à soupe",
+	"ml" = "ml",
+	"c. à café" = "c. à café",
+}
 export type IngredientsDansRecetteRecord = {
 	created: IsoAutoDateString
 	id: string
 	ingredient?: RecordIdString
 	quantite?: number
 	recette?: RecordIdString
+	unite?: IngredientsDansRecetteUniteOptions
 	updated: IsoAutoDateString
 }
 
@@ -181,6 +193,7 @@ export type UsersRecord = {
 	id: string
 	name?: string
 	password: string
+	pseudo?: string
 	tokenKey: string
 	updated: IsoAutoDateString
 	verified?: boolean
@@ -188,10 +201,10 @@ export type UsersRecord = {
 
 // Response types include system fields and match responses from the PocketBase API
 export type CommentairesResponse<Texpand = unknown> = Required<CommentairesRecord> & BaseSystemFields<Texpand>
+export type EtapesPrepResponse<Texpand = unknown> = Required<EtapesPrepRecord> & BaseSystemFields<Texpand>
 export type FavoriResponse<Texpand = unknown> = Required<FavoriRecord> & BaseSystemFields<Texpand>
 export type IngredientsResponse<Texpand = unknown> = Required<IngredientsRecord> & BaseSystemFields<Texpand>
 export type RecettesResponse<Texpand = unknown> = Required<RecettesRecord> & BaseSystemFields<Texpand>
-export type ValeursNutritionnellesResponse<Texpand = unknown> = Required<ValeursNutritionnellesRecord> & BaseSystemFields<Texpand>
 export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>
 export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRecord> & BaseSystemFields<Texpand>
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
@@ -204,10 +217,10 @@ export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSyste
 
 export type CollectionRecords = {
 	Commentaires: CommentairesRecord
+	Etapes_prep: EtapesPrepRecord
 	Favori: FavoriRecord
 	Ingredients: IngredientsRecord
 	Recettes: RecettesRecord
-	ValeursNutritionnelles: ValeursNutritionnellesRecord
 	_authOrigins: AuthoriginsRecord
 	_externalAuths: ExternalauthsRecord
 	_mfas: MfasRecord
@@ -219,10 +232,10 @@ export type CollectionRecords = {
 
 export type CollectionResponses = {
 	Commentaires: CommentairesResponse
+	Etapes_prep: EtapesPrepResponse
 	Favori: FavoriResponse
 	Ingredients: IngredientsResponse
 	Recettes: RecettesResponse
-	ValeursNutritionnelles: ValeursNutritionnellesResponse
 	_authOrigins: AuthoriginsResponse
 	_externalAuths: ExternalauthsResponse
 	_mfas: MfasResponse

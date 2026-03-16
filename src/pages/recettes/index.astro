@@ -1,19 +1,21 @@
 ---
+import CardRecette from "../../components/Card_recette.astro";
 import Layout from "../../layouts/Layout.astro";
+const prerender = false;
 
 const recettes = await Astro.locals.pb.collection("Recettes").getFullList();
 ---
 <Layout titre="Recettes">
     <h1>Recettes</h1>
-    <!-- Card recettes
-     <ul>
+    Card recettes
+     <ul class="grid grid-cols-1 place-self-center justify-self-center ">
         {recettes.map((recette) => (
-            <li>gngn carte</li>
+            <li class="place-self-center justify-self-center mx-auto"><CardRecette recette={recette} /></li>
         ))} 
     </ul>
     { 
     Astro.locals.pb.authStore.isValid &&
     <a href="/recettes/edit/">Ajouter une recette</a>
     }
-    -->
+   
 </Layout>

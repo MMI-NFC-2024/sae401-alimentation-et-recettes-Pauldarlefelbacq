@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Rampart+One&display=swap');
-
 @import "tailwindcss";
 
 @theme {
@@ -16,10 +15,17 @@
 @layer base {
     h1 {
         font-family: var(--font-rampart);
+        color: var(--color-bleu);
         text-align: center;
+        font-size: 4rem;
     }
 
     h2 {
         font-family: var(--font-comforta);
     }
+
+    p {
+    font-family: var(--font-comforta);
+    font-size: 1rem;
+  }
 }

@@ -3,7 +3,8 @@ interface Props {
     note: number,
 }
 const { note } = Astro.props;
+const width = `${Math.max(0, Math.min(100, (note / 5) * 100))}%`;
 ---
-<div class="w-fit h-2.5 bg-bleu">
-    <div class=`w-[${note}%] h-2.5 bg-beige border border-bleu` />
+<div class="w-full h-2.5 bg-bleu rounded-full">
+    <div class="h-2.5 bg-beige border rounded-full border-bleu" style={`width: ${width};`} />
 </div>
