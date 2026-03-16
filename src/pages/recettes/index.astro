@@ -1,0 +1,19 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const recettes = await Astro.locals.pb.collection("Recettes").getFullList();
+---
+<Layout titre="Recettes">
+    <h1>Recettes</h1>
+    <!-- Card recettes
+     <ul>
+        {recettes.map((recette) => (
+            <li>gngn carte</li>
+        ))} 
+    </ul>
+    { 
+    Astro.locals.pb.authStore.isValid &&
+    <a href="/recettes/edit/">Ajouter une recette</a>
+    }
+    -->
+</Layout>

@@ -1,16 +1,24 @@
 ---
 import '../styles/global.css';
+import grid from "../assets/grid_pattern.svg";
+
+interface Props {
+	titre: string,
+}
+const { titre } = Astro.props;
 ---
 <html lang="fr">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Spoonful | { titre }</title>
 	</head>
-	<body>
+	<body class="bg-[url(/grid_pattern.svg)] bg-repeat bg-beige">
 		<slot />
 	</body>
 </html>

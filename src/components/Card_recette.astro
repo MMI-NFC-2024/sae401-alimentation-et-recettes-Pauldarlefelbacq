@@ -1,0 +1,40 @@
+---
+import type { RecettesResponse } from '../pocketbase-types'
+import { TpsTotal } from "../utils/helper";
+import Button from './Button.astro';
+import ProgressBar from './Progress_bar.astro';
+
+type Props= {
+    recette: RecettesResponse
+}
+const recette = Astro.props.recette;
+const tps = TpsTotal(recette.temps_cuisson, recette.temps_prep);
+const commentaires = await Astro.locals.pb.collection("Commentaires").getFullList({
+    filter: `recette = ${recette.id}`
+});
+const moyenne = commentaires.length > 0
+    ? commentaires.reduce((sum, r) => sum + r.note, 0) / commentaires.length
+    : 0;
+const nb_com = commentaires.length;
+---
+<a href=`/recettes/${recette.id}`>
+    <div>
+        <div>
+            <p>{recette.titre}</p>
+            <div>
+                <p>Tps préparation</p>
+                <p>{tps}</p>
+            </div>
+            <Button texte={recette.type} />
+            <div>
+                <p>{ nb_com } avis</p>
+                <div>
+                    <ProgressBar note={moyenne}/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+
+    </div>
+</a>

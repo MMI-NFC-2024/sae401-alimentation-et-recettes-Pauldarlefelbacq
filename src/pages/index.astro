@@ -1,8 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
-
+import Arrow from "../assets/arrow.svg";
 ---
-<Layout>
-	<h1>test tailwind</h1>
+<Layout titre = "Accueil">
+	<div>
+		<h1 class="text-9xl text-bleu text-left w-9/10 mt-24 md:text-[13.75rem]">Envie de mieux manger</h1>
+		<img src={Arrow.src} alt="fleche vers le bas" />
+	</div>
 </Layout>

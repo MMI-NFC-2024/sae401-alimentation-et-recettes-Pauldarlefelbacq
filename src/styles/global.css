@@ -1,1 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Rampart+One&display=swap');
+
 @import "tailwindcss";
+
+@theme {
+    /* Typo */
+    --font-rampart: "Rampart One", serif;
+    --font-comforta: "Comfortaa", sans-serif;
+
+    /* Couleurs */
+    --color-beige: #ffea8f;
+    --color-bleu: #222781;
+    --color-vert: #c8d69b;
+}
+
+@layer base {
+    h1 {
+        font-family: var(--font-rampart);
+        text-align: center;
+    }
+
+    h2 {
+        font-family: var(--font-comforta);
+    }
+}

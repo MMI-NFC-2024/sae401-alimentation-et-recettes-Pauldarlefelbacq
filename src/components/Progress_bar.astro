@@ -1,0 +1,9 @@
+---
+interface Props {
+    note: number,
+}
+const { note } = Astro.props;
+---
+<div class="w-fit h-2.5 bg-bleu">
+    <div class=`w-[${note}%] h-2.5 bg-beige border border-bleu` />
+</div>
