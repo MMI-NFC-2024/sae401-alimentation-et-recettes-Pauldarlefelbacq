@@ -1,4 +1,5 @@
 ---
+import { formatHeure, checkHeure } from "../utils/helper";
 import type { RecettesResponse } from '../pocketbase-types'
 import { TpsTotal } from "../utils/helper";
 import Button from './Button.astro';
@@ -25,7 +26,7 @@ const nb_com = commentaires.length;
         <p class="font-rampart text-2xl text-bleu">{ recette.titre }</p>
         <div class="text-right">
             <p class="text-base">Tps préparation</p>
-            <p class="text-bleu font-bold">{ tps }</p>
+            <p class="text-bleu font-bold">{ formatHeure(tps) } { checkHeure(tps) ? ("h"):("mins")}</p>
         </div>
         <Button texte={recette.type} />
         <div>

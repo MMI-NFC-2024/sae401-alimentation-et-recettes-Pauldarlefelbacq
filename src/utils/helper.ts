@@ -5,7 +5,7 @@ export function TpsTotal (a:number, b:number) {
 export function formatHeure (tps: number){
     if (tps >= 60)
     {
-        return (Math.round((tps / 60) * 10)) /10;
+        return (Math.round(tps / 60)) + (tps % 60) / 100 ;
     }
     return tps;
 }

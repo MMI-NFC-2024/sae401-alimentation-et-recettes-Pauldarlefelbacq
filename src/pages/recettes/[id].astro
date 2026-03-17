@@ -7,7 +7,7 @@ import Plus from "../../assets/plus.svg";
 import Arrow from "../../assets/arrow.svg";
 
 import { formatHeure, checkHeure } from "../../utils/helper";
-import { type UsersResponse, type CommentairesResponse, type RecettesResponse, type IngredientsDansRecetteResponse, type IngredientsResponse, EtapesPrepResponse } from "../../pocketbase-types";
+import { type UsersResponse, type CommentairesResponse, type RecettesResponse, type IngredientsDansRecetteResponse, type IngredientsResponse, type EtapesPrepResponse } from "../../pocketbase-types";
 import CardCommentaire from "../../components/CardCommentaire.astro";
 export const prerender = false;
 
@@ -187,12 +187,12 @@ const nb_com = commentaires.length;
         <!-- Ingrédients -->
         <section>
             <div>
-                <div class="flex justify-between place-items-center w-9/10 mx-auto">
+                <div class="flex justify-between place-items-center w-9/10 mx-auto mb-2.5">
                     <h2 class="w-9/10 mx-auto">Ingrédients</h2>
                     <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
-                        <button><Moins /></button>
-                        <button class="bg-bleu text-beige h-full">{recette.nb_personnes} personnes</button>
-                        <button><Plus /></button>
+                        <button class="flex-1"><Moins /></button>
+                        <button class="grow whitespace-nowrap bg-bleu text-beige h-full">{recette.nb_personnes} personnes</button>
+                        <button class="flex-1"><Plus /></button>
                     </div>
                 </div>
                 <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
