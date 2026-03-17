@@ -1,10 +1,11 @@
 ---
 interface Props {
     note: number,
+    color: string,
 }
-const { note } = Astro.props;
+const { note, color = "beige" } = Astro.props;
 const width = `${Math.max(0, Math.min(100, (note / 5) * 100))}%`;
 ---
 <div class="w-full h-2.5 bg-bleu rounded-full">
-    <div class="h-2.5 bg-beige border rounded-full border-bleu" style={`width: ${width};`} />
+    <div class=`h-2.5 bg-${color} border rounded-full border-bleu` style={`width: ${width};`} />
 </div>

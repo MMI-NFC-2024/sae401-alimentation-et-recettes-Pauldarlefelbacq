@@ -13,21 +13,24 @@ interface Props {
 }
 const { com } = Astro.props
 ---
-<div class="">
+<div class="bg-vert w-9/10 mx-auto rounded-xl p-3.5">
     {/* espace du haut */}
-    <div>
+    <div class="flex justify-around">
         {/* Nom & statut */}
-        <div>
-            <a href="">{com.expand?.user?.name}</a>
+        <div class="flex-2">
+            <a href="" class="text-xl text-bleu">{com.expand?.user?.name}</a>
             {
                 com.expand?.user?.coach ? (
-                <p>membre</p>
+                <p class="text-sm">membre</p>
                 ):(
-                <p>coach</p>
+                <p class="text-sm">coach</p>
                 )
             }
         </div>
-        <ProgressBar note={com.note} />
+        <div class="flex flex-1 place-items-baseline">
+            <ProgressBar note={com.note} color='vert' />
+            <p>{com.note}/5</p>
+        </div>
     </div>
-    <p>{com.contenu}</p>
+    <p class="text-sm mt-5">{com.contenu}</p>
 </div>

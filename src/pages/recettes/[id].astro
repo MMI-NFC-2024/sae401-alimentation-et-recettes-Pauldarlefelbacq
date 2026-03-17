@@ -4,22 +4,23 @@ import Layout from "../../layouts/Layout.astro";
 import Button from '../../components/Button.astro';
 import Moins from "../../assets/moins.svg";
 import Plus from "../../assets/plus.svg";
+import Arrow from "../../assets/arrow.svg";
 
 import { formatHeure, checkHeure } from "../../utils/helper";
-import type { UsersResponse, CommentairesResponse, RecettesResponse, IngredientsDansRecetteResponse, IngredientsResponse } from "../../pocketbase-types";
+import { type UsersResponse, type CommentairesResponse, type RecettesResponse, type IngredientsDansRecetteResponse, type IngredientsResponse, EtapesPrepResponse } from "../../pocketbase-types";
 import CardCommentaire from "../../components/CardCommentaire.astro";
 export const prerender = false;
 
 type RecetteWithUser = RecettesResponse & {
-  expand?: {
-    user?: UsersResponse;
-  };
+    expand?: {
+        user?: UsersResponse;
+    };
 };
 
 type IngredientDansRecetteWithExpand = IngredientsDansRecetteResponse & {
-  expand?: {
-    ingredient?: IngredientsResponse;
-  };
+    expand?: {
+        ingredient?: IngredientsResponse;
+    };
 };
 
 type CommentaireWithUser = CommentairesResponse & {
@@ -41,99 +42,239 @@ const commentaires = await Astro.locals.pb.collection("Commentaires").getFullLis
     expand: 'user',
 })
 
+//préparation
+const preparation = await Astro.locals.pb.collection("Etapes_prep").getFullList<EtapesPrepResponse>({
+    filter: `recette = "${recette.id}"`,
+})
+
 // Ingrédients
-const ingredients = await Astro.locals.pb.collection("ingredients_dans_recette").getFullList<IngredientsDansRecetteResponse>({
+const ingredients = await Astro.locals.pb.collection("ingredients_dans_recette").getFullList<IngredientDansRecetteWithExpand>({
     filter: `recette = "${recette.id}"`,
     expand: 'ingredient'
 })
+
+//Commentaire
+if (Astro.request.method === "POST") 
+{
+    const data = await Astro.request.formData();
+    try 
+    {
+        const note = Number(data.get("note"));
+        const contenu = data.get("contenu") as string;
+        const user = Astro.locals.pb.authStore.record?.id;
+
+        if (user) {
+            await Astro.locals.pb.collection("Commentaires").create({
+                note,
+                contenu,
+                user,
+                recette: id,
+            });
+
+            return Astro.redirect(`${Astro.url.pathname}#commentaires`, 303);
+        }
+    } catch (e) {
+        if (e instanceof Error) 
+        {
+            console.error(e.message);
+        }
+    }
+}
+
+//Nutrition long et répétitif...
+let calories = 0;
+ingredients.forEach((ing) => {
+    if (ing.expand?.ingredient?.unitaire)
+    {
+        calories += ing.expand.ingredient.calories * ing.quantite
+    }
+    else 
+    {
+        calories += ing.expand.ingredient.calories * (ing.quantite / 100)
+    }
+});
+let mat_grasses = 0;
+ingredients.forEach((ing) => {
+    if (ing.expand?.ingredient?.unitaire)
+    {
+        mat_grasses += ing.expand.ingredient.mat_grasses * ing.quantite
+    }
+    else 
+    {
+        mat_grasses += ing.expand.ingredient?.mat_grasses * (ing.quantite / 100)
+    }
+});
+let proteines = 0;
+ingredients.forEach((ing) => {
+    if (ing.expand?.ingredient?.unitaire)
+    {
+        proteines += ing.expand.ingredient.proteines * ing.quantite
+    }
+    else 
+    {
+        proteines += ing.expand.ingredient.proteines * (ing.quantite / 100)
+    }
+});
+let glucides = 0;
+ingredients.forEach((ing) => {
+    if (ing.expand?.ingredient?.unitaire)
+    {
+        glucides += ing.expand.ingredient.glucides * ing.quantite
+    }
+    else 
+    {
+        glucides += ing.expand.ingredient.glucides * (ing.quantite / 100)
+    }
+});
 
 const nb_com = commentaires.length;
 
 ---
 <Layout titre={recette.titre}>
-    <h1>{ recette.titre }</h1>
-    <section class="justify-items-end place-self-center grid w-9/10 mx-auto">
-        <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5">Recette proposée par <a href="" class="text-bleu underline active:text-vert hover:text-black">{auteur.name}</a></p>
-        <ImgPb 
+    <main class="*:my-5">
+        <a href="/recettes">
+            <Arrow class="rotate-90 size-20 mt-3 hover:*:fill-vert hover:*:stroke-bleu" />
+        </a>
+        <h1>{ recette.titre }</h1>
+        <!-- img et créateur -->
+        <section class="justify-items-end place-self-center grid w-9/10 mx-auto">
+            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5">Recette proposée par <a href="" class="text-bleu underline active:text-vert">{auteur.name}</a></p>
+            <ImgPb
             record={recette}
             image={recette.image}
             alt={`image de ${recette.titre}`}
             classPicture="w-full h-full mx-auto"
-            classImg="w-full h-full object-cover rounded-xl"/>
-    </section>
-    <section class="flex place-items-center justify-around">
-        <Button texte={recette.type}/>
-        <a href="#commentaire" class="text-bleu font-bold underline">{nb_com} avis</a>
-    </section>
-    <section class="flex place-items-center justify-around bg-beige border border-bleu rounded-xl">
-        <div>
-            <div>
-                Cuisson
-            </div>
-            <div class="flex">
-                <p>{formatHeure(recette.temps_cuisson)}</p>
-                {checkHeure(recette.temps_cuisson) ? (
-                    <p>h</p>
-                ):(
-                    <p>mins</p>
-                )}
-            </div>
-        </div>
-        <div>
-            <div>
-                Préparation
-            </div>
-            <div class="flex">
-                <p>{formatHeure(recette.temps_prep)}</p>
-                {checkHeure(recette.temps_prep) ? (
-                    <p>h</p>
-                ):(
-                    <p>mins</p>
-                )}
-            </div>
-        </div>
-    </section>
-    <section>
-        <h2>Description</h2>
-        <p>{recette.description}</p>
-    </section>
-    <section>
-        <div>
-            <div>
-                <h2>Ingrédients</h2>
-                <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
-                    <button><Moins /></button>
-                    <button class="bg-bleu text-beige h-full">{recette.nb_personnes} personnes</button>
-                    <button><Plus /></button>
+            classImg="w-full h-[250px] object-cover rounded-xl"/>
+        </section>
+        <section class="flex place-items-center justify-around">
+            <Button texte={recette.type}/>
+            <a href="#commentaires" class="text-bleu font-bold underline">{nb_com} avis</a>
+        </section>
+        <!-- Tps nécéssaire -->
+        <section class="flex place-items-center justify-around bg-beige border border-bleu rounded-xl w-fit gap-12 px-5 py-1 mx-auto">
+            <div class="flex flex-col place-items-center">
+                <div>
+                    Cuisson
+                </div>
+                <div class="flex text-bleu">
+                    <p>{formatHeure(recette.temps_cuisson)}</p>
+                    {checkHeure(recette.temps_cuisson) ? (
+                        <p>h</p>
+                        ):(
+                        <p>mins</p>
+                    )}
                 </div>
             </div>
-            <ul class="grid grid-cols-2 bg-beige">
-                {
-                    ingredients.map((ing) => (
+            <div class="flex flex-col place-items-center ">
+                <div>
+                    Préparation
+                </div>
+                <div class="flex text-bleu">
+                    <p>{formatHeure(recette.temps_prep)}</p>
+                    {checkHeure(recette.temps_prep) ? (
+                    <p>h</p>
+                    ):(
+                    <p>mins</p>
+                    )}
+                </div>
+            </div>
+        </section>
+        <!-- Description -->
+        <section>
+            <h2 class="w-9/10 mx-auto">Description</h2>
+            <p class="bg-beige border border-bleu rounded-xl p-3.5 w-9/10 mx-auto">{recette.description}</p>
+        </section>
+        <!-- Ingrédients -->
+        <section>
+            <div>
+                <div class="flex justify-between place-items-center w-9/10 mx-auto">
+                    <h2 class="w-9/10 mx-auto">Ingrédients</h2>
+                    <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
+                        <button><Moins /></button>
+                        <button class="bg-bleu text-beige h-full">{recette.nb_personnes} personnes</button>
+                        <button><Plus /></button>
+                    </div>
+                </div>
+                <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
+                    {
+                        ingredients.map((ing) => (
                         <li>{ing.expand?.ingredient?.nom}</li>
-                        <li>{ing.quantite}{ing.unite}</li>
+                        <li class="justify-self-end">{ing.quantite}{ing.unite}</li>
+                        ))
+                    }
+                </ul>
+            </div>
+        </section>
+        <!-- Valeurs nutritionnelles -->
+        <section>
+            <h2 class="w-9/10 mx-auto">Valeurs nutritionnelles</h2>
+            <div>
+                <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
+                    <li>Calories</li>
+                    <li class="justify-self-end">{ Math.round(calories) } Kcal</li>
+                    <li>Protéines</li>
+                    <li class="justify-self-end">{ Math.round(proteines) } g</li>
+                    <li>Glucides</li>
+                    <li class="justify-self-end">{ Math.round(glucides) } g</li>
+                    <li>Matières grasses</li>
+                    <li class="justify-self-end">{ Math.round(mat_grasses) } g</li>
+                </ul>
+            </div>
+        </section>
+        <!-- Etapes de préparation -->
+        <section>
+            <h2 class="w-9/10 mx-auto">Préparation</h2>
+            <ul>
+                {
+                    preparation.map((prep, index) => (
+                    <li class="bg-beige w-9/10 mx-auto border border-bleu rounded-xl my-2.5 p-3.5">
+                        <p class="text-xl text-bleu underline">Étape {index + 1}</p>
+                        <p>{prep.contenu}</p>
+                    </li>
                     ))
                 }
             </ul>
-        </div>
-    </section>
-    <section>
-        <h2>Préparation</h2>
-        <ul>
-            {
-
-            }
-        </ul>
-    </section>
-    <section>
-        <h2>Commentaires</h2>
-        <div>
-            {
-                commentaires.map((com) => (
-                    // card globale
+        </section>
+        <!-- Commentaires -->
+        <section id="commentaires">
+            <h2 class="w-9/10 mx-auto">Commentaires</h2>
+            <div class="*:my-5">
+                {
+                    commentaires.map((com) => (
                     <CardCommentaire com={com} />
-                ))
-            }
-        </div>
-    </section>
+                    ))
+                }
+            </div>
+        </section>
+        <section>
+            {Astro.locals.pb.authStore.isValid ? (
+                <h2>Poster un commentaire</h2>
+                <form method="POST" action={Astro.url.pathname}>
+                    <label>
+                        <span>Note</span>
+                        <input 
+                            type="number"
+                            name="note"
+                            max="5"
+                            min="0"
+                            required
+                        />
+                    </label>
+                    <label>
+                        <span>Contenu</span>
+                        <textarea 
+                            name="contenu" 
+                            rows="5"
+                            required
+                        />
+                    </label>
+                    <button>
+                        Envoyer
+                    </button>
+                </form>
+            ) : (
+                <p>Il est nécéssaire de vous <a href="">connecter</a> pour poster un commentaire</p>
+            )}
+        </section>
+    </main>
 </Layout>
