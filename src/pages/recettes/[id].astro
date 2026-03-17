@@ -248,8 +248,8 @@ const nb_com = commentaires.length;
         </section>
         <section>
             {Astro.locals.pb.authStore.isValid ? (
-                <h2>Poster un commentaire</h2>
-                <form method="POST" action={Astro.url.pathname}>
+                <h2 class="w-9/10 mx-auto">Poster un commentaire</h2>
+                <form method="POST" action={Astro.url.pathname} class="flex flex-col *:my-1.5 w-9/10 mx-auto">
                     <label>
                         <span>Note</span>
                         <input 
@@ -257,18 +257,19 @@ const nb_com = commentaires.length;
                             name="note"
                             max="5"
                             min="0"
+                            class="bg-vert text-bleu font-comforta p-1.5 rounded-md"
                             required
                         />
                     </label>
-                    <label>
-                        <span>Contenu</span>
                         <textarea 
-                            name="contenu" 
+                            name="contenu"
                             rows="5"
+                            class="bg-beige border-4 rounded-xl border-vert font-comforta"
                             required
                         />
-                    </label>
-                    <button>
+                    <button 
+                        class="bg-vert text-bleu text-xl font-bold font-comforta w-fit py-3 px-5 rounded-xl mx-auto cursor-pointer hover:bg-bleu hover:text-vert transition duration-100"
+                    >
                         Envoyer
                     </button>
                 </form>
