@@ -21,9 +21,9 @@ const { com } = Astro.props
             <a href="" class="text-xl text-bleu">{com.expand?.user?.name}</a>
             {
                 com.expand?.user?.coach ? (
-                <p class="text-sm">membre</p>
-                ):(
                 <p class="text-sm">coach</p>
+                ):(
+                <p class="text-sm">membre</p>
                 )
             }
         </div>
