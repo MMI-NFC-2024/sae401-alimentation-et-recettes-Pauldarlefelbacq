@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import grid from "../assets/grid_pattern.svg";
+import Header from './Header.astro';
 
 interface Props {
 	titre: string,
@@ -19,6 +20,7 @@ const { titre } = Astro.props;
 		<title>Spoonful | { titre }</title>
 	</head>
 	<body class="bg-[url(/grid_pattern.svg)] bg-repeat bg-beige">
+		<Header />
 		<slot />
 	</body>
 </html>

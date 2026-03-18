@@ -1,0 +1,37 @@
+---
+const user = Astro.locals.pb.authStore;
+---
+<header class="sticky top-5 bg-beige border border-bleu p-2 lg:py-4 md:text-base lg-text-xl rounded-xl w-7/10 mx-auto font-comforta text-sm">
+    <nav>
+        <ul class="flex flex-wrap justify-around gap-2 *:hover:underline *:hover:font-bold *:hover:text-bleu *:active:text-bleu">
+            <li><a data-nav-link href="/">Accueil</a></li>
+            <li><a data-nav-link href="/recettes">recettes</a></li>
+            <li><a data-nav-link href="/coachs">Coachs</a></li>
+            {user.isValid ? (
+               <li><a data-nav-link href="/profil">Profil</a></li> 
+            ):(
+                <li><a data-nav-link href="/authpassword">Se connecter</a></li>
+            )}
+        </ul>
+    </nav>
+</header>
+<script lang="ts">
+    const normalizePath = (path) => {
+        if (path === "/") return "/";
+        return path.replace(/\/+$/, "");
+    };
+
+    const activePage = normalizePath(window.location.pathname);
+    const links = document.querySelectorAll("a[data-nav-link]");
+
+    links.forEach((l) => {
+        const linkPath = normalizePath(new URL(l.href, window.location.origin).pathname);
+        const isActive = linkPath === "/"
+            ? activePage === "/"
+            : activePage === linkPath || activePage.startsWith(`${linkPath}/`);
+
+        l.classList.toggle("underline", isActive);
+        l.classList.toggle("font-bold", isActive);
+        l.classList.toggle("text-bleu", isActive);
+    });
+</script>

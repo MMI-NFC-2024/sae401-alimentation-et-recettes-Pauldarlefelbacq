@@ -1,0 +1,188 @@
+---
+export const prerender = false
+import Layout from "../../../layouts/Layout.astro";
+import { IngredientsDansRecetteUniteOptions, type EtapesPrepResponse, type IngredientsDansRecetteResponse, type IngredientsResponse, type RecettesResponse } from "../../../pocketbase-types";
+
+type IngredientDansRecetteWithExpand = IngredientsDansRecetteResponse & {
+    expand?: {
+        ingredient?: IngredientsResponse;
+    };
+};
+
+type EtapesDansRecetteWithExpand = EtapesPrepResponse & {
+    expand?:{
+        recette?: RecettesResponse;
+    };
+};
+
+const { id } = Astro.params as { id: string };
+const unites = Object.values(IngredientsDansRecetteUniteOptions);
+
+const ingredients = await Astro.locals.pb.collection("ingredients_dans_recette").getFullList<IngredientDansRecetteWithExpand>({
+    filter: `recette = "${id}"`,
+    expand: 'ingredient',
+});
+
+const etapes = await Astro.locals.pb.collection("Etapes_prep").getFullList<EtapesDansRecetteWithExpand>({
+    filter: `recette = "${id}"`,
+    expand: `recette`,
+})
+
+const AllIngredients = await Astro.locals.pb.collection("Ingredients").getFullList();
+
+
+if (Astro.request.method === "POST")
+{
+    const data = await Astro.request.formData();
+    try
+    {
+        const action = data.get("action") as string;
+        const ingredient = data.get("ingredient") as string;
+        const quantite = Number(data.get("quantite"));
+        const unite = data.get("unite") as string;
+        const recette = data.get("recette") as string;
+
+        const ingredient_actuel = data.get("ingredient_actuel") as string;
+
+        const contenu = data.get("contenu") as string;
+
+        if (action === "ajout_ingredient"){
+            await Astro.locals.pb.collection("ingredients_dans_recette").create({
+                recette,
+                ingredient,
+                quantite,
+                unite,
+            });
+            return Astro.redirect(`/recettes/edit/${id}`, 303);
+        }else if (action === "suppr_ing")
+        {
+            console.log(ingredient_actuel);
+            await Astro.locals.pb.collection("ingredients_dans_recette").delete(ingredient_actuel);
+            return Astro.redirect(`/recettes/edit/${id}`, 303);
+        }
+        else if (action === "ajout_etape")
+        {
+            await Astro.locals.pb.collection("Etapes_prep").create({
+                contenu,
+                recette,
+            })
+            return Astro.redirect(`/recettes/edit/${id}#etapes`, 303);
+        }
+    } catch (e)
+    {
+        if (e instanceof Error) 
+        {
+            console.error(e.message);
+        }
+    }
+}
+
+---
+<Layout titre="Édition recette">
+<main class="w-screen overflow-x-hidden">
+    <h1 class="fixed top-0 z-10">Partager une recette</h1>
+    <div id="pageForm" class="flex w-[200vw] transition-transform duration-300 ease-in-out">
+        <section class="w-screen shrink-0 min-h-screen flex items-center justify-center">
+            <div class="w-9/10">
+                {ingredients.length === 0 ? (
+                        <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center">Veuillez ajouter un ingrédient</p>
+                    ):(
+                        <ul class="overflow-scroll max-h-60">
+                            {ingredients.map((ing) => (
+                            <li class="flex justify-between bg-beige border border-bleu rounded-xl p-2 my-2.5">
+                                <span>{ing.expand?.ingredient?.nom}</span>
+                                <span>{ing.quantite}{ing.unite}</span>
+                                <form method="POST" action={Astro.url.pathname}>
+                                    <input type="hidden" name="recette" value={id} />
+                                    <input type="hidden" name="action" value="suppr_ing">
+                                    <input type="hidden" name="ingredient_actuel" value={ing.id}>
+                                    <button class="bg-red-500/80 text-beige font-bold text-sm p-1 rounded-full">Supprimer</button>
+                                </form>
+                            </li>
+                            ))}
+                        </ul>
+                    )}
+                <form method="POST" action={Astro.url.pathname} class="bg-beige border-2 border-bleu px-4 py-2.5 rounded-xl">
+                    <input type="hidden" name="action" value="ajout_ingredient">
+                    <input type="hidden" name="recette" value={id} />
+                    <p>Ajouter des ingrédients</p>
+                    <div class="flex justify-around *:border-2 *:border-bleu *:bg-white *:rounded-xl *:ml-5 *:px-2 *:py-1 *:min-w-0 py-1">
+                        <select name="ingredient" class="grow">
+                            <option value="">Ingrédient</option>
+                            {
+                                AllIngredients.map((i) =>(
+                                    <option value={i.id}>{i.nom}</option>
+                                ))
+                            }
+                        </select>
+                        <input 
+                            type="number"
+                            name="quantite"
+                            placeholder="Quantité"
+                            class="w-fit"
+                            required
+                        />
+                        <select name="unite" class="w-fit">
+                            <option value="">Unité</option>
+                            {
+                                unites.map((i) =>(
+                                    <option value={i}>{i}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+                    <button class="ml-auto block bg-bleu text-beige px-2 py-0.5 rounded-xl">Ajouter</button>
+                </form>
+                <button id="pageChange" type="button" class="mt-4 mx-auto block bg-bleu text-beige p-3.5 rounded-xl">
+                    Étape suivante
+                </button>
+            </div>
+        </section>
+        <section class="w-screen shrink-0 min-h-screen flex items-center justify-center">
+            <div class="w-9/10">
+                {etapes.length === 0 ? (
+                        <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center">Veuillez ajouter une étape</p>
+                    ):(
+                        <ul class="overflow-scroll max-h-60">
+                            {etapes.map((e, index) => (
+                            <li class="flex flex-col justify-between bg-beige border border-bleu rounded-xl p-2 my-2.5">
+                                <p class="text-bleu font-bold underline">Étape {index + 1}</p>
+                                <p class="p-2 border-2 border-bleu rounded-xl mt-2.5">{e.contenu}</p>
+                            </li>
+                            ))}
+                        </ul>
+                    )}
+                <form method="POST" action={Astro.url.pathname} class="bg-beige border-2 border-bleu px-4 py-2.5 rounded-xl mt-7" id="etapes">
+                    <input type="hidden" name="recette" value={id} />
+                    <input type="hidden" name="action" value="ajout_etape">
+                    <p>Ajouter des Etapes de préparation</p>
+                    <textarea 
+                        name="contenu"
+                        placeholder="Écrire l'étape à suivre"
+                        rows="5"
+                        class="border-2 border-bleu bg-white rounded-xl p-1 w-full"></textarea>
+                    <button class="ml-auto block bg-bleu text-beige px-2 py-0.5 rounded-xl">Ajouter</button>
+                </form>
+            <button id="pageChangeBack" type="button" class="mt-4 mx-auto block bg-bleu text-beige p-3.5 rounded-xl">Retour</button>
+        </section>
+    </div>
+</main>
+</Layout>
+
+<script>
+    const button = document.getElementById('pageChange') as HTMLButtonElement | null;
+    const buttonBack = document.getElementById('pageChangeBack') as HTMLButtonElement | null;
+    const pageForm = document.getElementById('pageForm') as HTMLElement | null;
+
+    button?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!pageForm) return;
+        pageForm.style.transform = 'translateX(-100vw)';
+    });
+
+    buttonBack?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!pageForm) return;
+        pageForm.style.transform = 'translateX(0)';
+    });
+</script>

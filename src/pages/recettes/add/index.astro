@@ -1,0 +1,148 @@
+---
+export const prerender = false
+import Layout from "../../../layouts/Layout.astro";
+import { RecettesTypeOptions } from "../../../pocketbase-types";
+
+const types = Object.values(RecettesTypeOptions);
+
+
+if (Astro.request.method === "POST") 
+{
+    const data = await Astro.request.formData();
+    try 
+    {
+        const user = Astro.locals.pb.authStore.record?.id;
+        const type = data.get("type") as string;
+        const nb_personnes = Number(data.get("nb_personnes"));
+        const titre = data.get("titre") as string;
+        const description = data.get("description") as string;
+        const image = data.get("image") as File;
+        const temps_cuisson = Number(data.get("temps_cuisson"));
+        const temps_prep = Number(data.get("temps_prep"));
+
+        if (user) 
+        {
+            const createdRecette = await Astro.locals.pb.collection("Recettes").create({
+                user,
+                type,
+                nb_personnes,
+                titre,
+                description,
+                image,
+                temps_cuisson,
+                temps_prep,
+            });
+            return Astro.redirect(`/recettes/edit/${createdRecette.id}`, 303);
+        }
+    } catch (e) 
+    {
+        if (e instanceof Error) 
+        {
+            console.error(e.message);
+        }
+    }
+}
+---
+<Layout titre="Création recette">
+    <main class="w-screen overflow-x-hidden">
+        <h1 class="fixed top-0 z-10">Partager une recette</h1>
+        <section class="flex flex-col items-center justify-center min-h-screen w-screen shrink-0">
+            <form
+                method="POST"
+                action={Astro.url.pathname}
+                class="flex flex-col font-comforta *:my-5 w-9/10 mx-auto mt-24"
+                enctype="multipart/form-data"
+            >
+                <div class="flex justify-around gap-5">
+                    <select
+                        name="type"
+                        class="bg-bleu text-beige rounded-xl text-center text-xl px-3 py-1.5 font-bold"
+                    >
+                    <option value="" class="text-center">type</option>
+                    {types.map(type =>(
+                        <option value={type} class="text-center">{ type }</option>
+                    ))}
+                    </select>
+                    <label class="w-fit">
+                        Pour combien de personnes ?
+                        <input
+                            type="number"
+                            min="0"
+                            name="nb_personnes"
+                            class="bg-white border-2 border-bleu rounded-xl pl-1.5 py-2 w-full"
+                        />
+                    </label>
+                </div>
+                <input
+                    type="text"
+                    name="titre"
+                    placeholder="Titre de la recette"
+                    class="bg-white border-2 border-bleu rounded-xl px-2 py-1"
+                    required
+                />
+                <textarea
+                    name="description"
+                    rows="4"
+                    placeholder="Description de la recette"
+                    class="bg-white border-2 border-bleu rounded-xl px-2 py-1"
+                    required
+                />
+                <label>
+                    Une petite photo du plat ?
+                    <input
+                        id="image-input"
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        placeholder="photo de la recette"
+                        class="bg-white border-2 border-bleu rounded-xl px-2 py-1 w-full max-w-xs overflow-hidden"
+                        required
+                    />
+                    <img id="image-preview" src="" alt="prévisualisation" class="hidden mt-2 w-full max-h-48 object-cover rounded-xl border-2 border-bleu" />
+                </label>
+                <div class="flex w-full flex-wrap *:min-w-0 *:flex-1 gap-5">
+                    <label class="flex-col">
+                        Temps de cuisson
+                        <input
+                            type="number"
+                            name="temps_cuisson"
+                            class="bg-white border-2 border-bleu rounded-xl px-2 py-1 w-full"
+                        />
+                    </label>
+                    <label class="flex-col">
+                        Temps de préparation
+                        <input
+                            type="number"
+                            name="temps_prep"
+                            class="bg-white border-2 border-bleu rounded-xl px-2 py-1 w-full"
+                        />
+                    </label>
+                </div>
+                <div class="w-fit mx-auto">
+                    <button class="bg-bleu text-beige text-base font-bold border rounded-xl p-3.5 w-fit mb-3.5 hover:bg-beige hover:text-bleu hover:border-bleu transition-all duration-100 cursor-pointer">Étape suivante</button>
+                    <div class="flex justify-around">
+                        <div class="bg-beige border border-blue size-3.5 rounded-full" />
+                        <div class="bg-bleu size-3.5 rounded-full" />
+                        <div class="bg-bleu size-3.5 rounded-full" />
+                    </div>
+                </div>
+            </form>
+        </section>
+    </main>
+
+<script>
+    const input = document.getElementById('image-input') as HTMLInputElement;
+    const preview = document.getElementById('image-preview') as HTMLImageElement;
+
+    input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('hidden');
+        } else {
+            preview.src = '';
+            preview.classList.add('hidden');
+        }
+    });
+</script>
+</Layout>

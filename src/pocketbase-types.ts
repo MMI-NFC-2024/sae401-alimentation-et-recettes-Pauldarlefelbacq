@@ -7,8 +7,10 @@ import type { RecordService } from 'pocketbase'
 
 export enum Collections {
 	Commentaires = "Commentaires",
+	CommentairesCoach = "Commentaires_coach",
 	EtapesPrep = "Etapes_prep",
 	Favori = "Favori",
+	FicheCoach = "Fiche_coach",
 	Ingredients = "Ingredients",
 	Recettes = "Recettes",
 	Authorigins = "_authOrigins",
@@ -59,6 +61,16 @@ export type CommentairesRecord = {
 	user?: RecordIdString
 }
 
+export type CommentairesCoachRecord = {
+	coach?: RecordIdString
+	contenu?: string
+	created: IsoAutoDateString
+	id: string
+	note?: number
+	updated: IsoAutoDateString
+	user?: RecordIdString
+}
+
 export type EtapesPrepRecord = {
 	contenu?: string
 	created: IsoAutoDateString
@@ -71,6 +83,15 @@ export type FavoriRecord = {
 	created: IsoAutoDateString
 	id: string
 	recette?: RecordIdString
+	updated: IsoAutoDateString
+	user?: RecordIdString
+}
+
+export type FicheCoachRecord = {
+	commentaires?: RecordIdString
+	created: IsoAutoDateString
+	id: string
+	lien?: string
 	updated: IsoAutoDateString
 	user?: RecordIdString
 }
@@ -202,8 +223,10 @@ export type UsersRecord = {
 
 // Response types include system fields and match responses from the PocketBase API
 export type CommentairesResponse<Texpand = unknown> = Required<CommentairesRecord> & BaseSystemFields<Texpand>
+export type CommentairesCoachResponse<Texpand = unknown> = Required<CommentairesCoachRecord> & BaseSystemFields<Texpand>
 export type EtapesPrepResponse<Texpand = unknown> = Required<EtapesPrepRecord> & BaseSystemFields<Texpand>
 export type FavoriResponse<Texpand = unknown> = Required<FavoriRecord> & BaseSystemFields<Texpand>
+export type FicheCoachResponse<Texpand = unknown> = Required<FicheCoachRecord> & BaseSystemFields<Texpand>
 export type IngredientsResponse<Texpand = unknown> = Required<IngredientsRecord> & BaseSystemFields<Texpand>
 export type RecettesResponse<Texpand = unknown> = Required<RecettesRecord> & BaseSystemFields<Texpand>
 export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>
@@ -218,8 +241,10 @@ export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSyste
 
 export type CollectionRecords = {
 	Commentaires: CommentairesRecord
+	Commentaires_coach: CommentairesCoachRecord
 	Etapes_prep: EtapesPrepRecord
 	Favori: FavoriRecord
+	Fiche_coach: FicheCoachRecord
 	Ingredients: IngredientsRecord
 	Recettes: RecettesRecord
 	_authOrigins: AuthoriginsRecord
@@ -233,8 +258,10 @@ export type CollectionRecords = {
 
 export type CollectionResponses = {
 	Commentaires: CommentairesResponse
+	Commentaires_coach: CommentairesCoachResponse
 	Etapes_prep: EtapesPrepResponse
 	Favori: FavoriResponse
+	Fiche_coach: FicheCoachResponse
 	Ingredients: IngredientsResponse
 	Recettes: RecettesResponse
 	_authOrigins: AuthoriginsResponse
