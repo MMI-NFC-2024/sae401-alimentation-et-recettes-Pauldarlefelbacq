@@ -10,20 +10,45 @@ const search = url.searchParams.get("s") ?? "";
 const coachs = await Astro.locals.pb.collection("users").getFullList<UsersResponse>({
     filter: 'coach = true',
 });
+
+const coachsFilter = search 
+? coachs.filter(i => i.name.toLowerCase().includes(search.toLowerCase()) 
+    || i.surname.toLowerCase().includes(search.toLowerCase())
+    || i.pseudo.toLowerCase().includes(search.toLowerCase())) 
+: [];
 ---
 <Layout titre="Coachs">
     <h1 class="mt-20">Coachs</h1>
-    <form action="/coachs" method="get">
+    <form action="/coachs" method="get" class="flex w-8/10 h-fit justify-center place-items-center place-self-center">
         <input 
             type="search"
             name="s"
             value={search}
             placeholder="Rechercher un coach..."
+            class="grid w-2/3 border-2 border-bleu rounded-lg bg-white my-5 mx-auto px-2 py-1 font-comforta"
         />
-        <button>Chercher</button>
+        <button 
+            type="submit"
+            class="bg-bleu text-beige p-2 rounded-xl border hover:bg-beige hover:text-bleu transition-all duration-100 h-fit"
+        >
+            Chercher
+        </button>
     </form>
 
-    {coachs.length === 0 ? (
+    {search ? (
+        coachsFilter.length === 0 ? (
+            <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
+                Aucun coach disponible pour le moment.
+            </p>
+            ):(
+            <ul class="grid grid-cols-1 place-self-center justify-self-center *:my-5">
+                {coachsFilter.map((coach) => (
+                    <li class="place-self-center justify-self-center mx-auto"><CardCoach coach={coach} /></li>
+                ))}
+            </ul>
+            )
+    ):(
+        coachs.length === 0 ? (
         <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
             Aucun coach disponible pour le moment.
         </p>
@@ -33,5 +58,6 @@ const coachs = await Astro.locals.pb.collection("users").getFullList<UsersRespon
                 <li class="place-self-center justify-self-center mx-auto"><CardCoach coach={coach} /></li>
             ))}
         </ul>
-    )}
+    ))}
+    
 </Layout>
