@@ -9,7 +9,7 @@ const user = Astro.locals.pb.authStore;
     <nav>
         <ul class="flex flex-wrap justify-around gap-2 *:hover:underline *:hover:font-bold *:hover:text-bleu *:active:text-bleu">
             <li><a data-nav-link href="/">Accueil</a></li>
-            <li><a data-nav-link href="/recettes">recettes</a></li>
+            <li><a data-nav-link href="/recettes">Recettes</a></li>
             <li><a data-nav-link href="/coachs">Coachs</a></li>
             {user.isValid ? (
                <li><a data-nav-link href="/profil">Profil</a></li> 
