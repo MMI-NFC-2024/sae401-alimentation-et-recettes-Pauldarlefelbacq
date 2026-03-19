@@ -10,7 +10,7 @@ const categories = Object.values(RecettesTypeOptions);
 <Layout titre="Recettes">
     <h1 class="mt-20">Recettes</h1>
     <input type="text" class="grid w-2/3 border-2 border-bleu rounded-lg bg-white my-5 mx-auto px-2 py-1 font-comforta" placeholder="Rechercher">
-    <div class="mx-auto w-fit">
+    <div class="mx-auto w-fit mb-10">
         {
         categories.map((cat) => (
             <a
@@ -22,9 +22,11 @@ const categories = Object.values(RecettesTypeOptions);
         ))
         }
     </div>
-     <ul class="grid grid-cols-1 place-self-center justify-self-center *:my-10">
+     <ul class="flex flex-wrap place-self-center justify-self-center *:my-3 place-items-baseline">
         {recettes.map((recette) => (
-            <li class="place-self-center justify-self-center mx-auto"><CardRecette recette={recette} /></li>
+            <li class="place-self-center justify-self-center mx-auto">
+                <CardRecette recette={recette} />
+            </li>
         ))} 
     </ul>
     { 

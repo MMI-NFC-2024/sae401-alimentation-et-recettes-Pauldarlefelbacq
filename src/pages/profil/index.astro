@@ -1,0 +1,244 @@
+---
+export const prerender = false
+import CardCommentaireCoach from "../../components/CardCommentaireCoach.astro";
+import ImgPb from "../../components/ImgPb.astro";
+import ProgressBar from "../../components/Progress_bar.astro";
+import Layout from "../../layouts/Layout.astro";
+import { UsersSpecialisationOptions, type CommentairesCoachResponse, type FicheCoachResponse, type UsersResponse } from "../../pocketbase-types";
+
+type CommentaireCoachWithUser = CommentairesCoachResponse & {
+    expand?: {
+        user?: UsersResponse;
+    };
+};
+
+const user = Astro.locals.pb.authStore.record as UsersResponse & { id: string } | null;
+
+const specialisations = Object.values(UsersSpecialisationOptions);
+
+if (!user) {
+    return Astro.redirect(`/authpassword`, 303);
+}
+
+const ficheCoach = user.coach ? await Astro.locals.pb.collection("Fiche_coach").getFullList<FicheCoachResponse>({
+    filter: `user = "${user.id}"`
+}) : [];
+
+const commentaires = user.coach ? await Astro.locals.pb.collection("Commentaires_coach").getFullList<CommentaireCoachWithUser>({
+    filter: `coach = "${user.id}"`,
+    expand: "user"
+}) : [];
+
+const fiche = ficheCoach[0];
+const moyenne = commentaires.length > 0
+    ? (Math.round((commentaires.reduce((sum, r) => sum + Number(r.note), 0) / commentaires.length) * 10)) / 10
+    : 0;
+const nb_com = commentaires.length;
+
+if (Astro.request.method === "POST") 
+{
+    const data = await Astro.request.formData();
+    try 
+    {
+        const name = data.get("name") as string;
+        const surname = data.get("surname") as string;
+        const email = data.get("email") as string;
+        const description = data.get("description") as string;
+        const pseudo = data.get("pseudo") as string;
+
+        const avatarInput = data.get("avatar");
+        const avatar = avatarInput instanceof File && avatarInput.size > 0 ? avatarInput : undefined;
+
+        const payload: Record<string, unknown> = {
+            name,
+            surname,
+            email,
+            description,
+            pseudo,
+        };
+
+        if (avatar) {
+            payload.avatar = avatar;
+        }
+
+        await Astro.locals.pb.collection("users").update(user.id, payload);
+        return Astro.redirect(`/profil`, 303);
+    }catch(e) {
+        if (e instanceof Error) {
+        console.error(e.message);
+    }
+    }
+}
+
+---
+<Layout titre={`Profil ${user.name || user.pseudo}`} color="beige">
+    <main class="mt-12 *:my-5">
+        <div class="flex bg-beige border border-bleu rounded-xl w-9/10 mx-auto p-2 place-items-center justify-around">
+            <div class="h-42 w-auto">
+                <ImgPb
+                    record={user}
+                    image={user.avatar}
+                    alt={`avatar de ${user.name || user.pseudo}`}
+                    classPicture="w-full h-full"
+                    classImg="w-full h-full object-cover rounded-full"
+                />
+            </div>
+            <div class="flex flex-col h-fit *:my-1">    
+                <p class="font-rampart text-2xl text-bleu">{user.surname} {user.name}</p>
+                <p class="text-base">@{user.pseudo}</p>
+                {user.coach && (
+                    <p class=" text-bleu font-bold">Coach</p>
+                )}
+            </div>
+        </div>
+
+        <button id="edit-user" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
+            Editer le profil
+        </button>
+
+        <div id="edit-profile-user" class="fixed inset-0 bg-black bg-opacity-50 z-50 h-full items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+            <div class="bg-white rounded-lg p-5 max-w-md w-full relative">
+                <button id="closeUser" class="absolute top-3 right-4 text-2xl text-bleu font-bold">×</button>
+                <h2 class="text-center mb-6">Modifier mon profil</h2>
+                <form method="POST" enctype="multipart/form-data" class="flex flex-col *:w-full *:font-comforta">
+                    <div class="flex w-full *:flex-1 gap-2.5 *:min-w-0">
+                        <input 
+                            type="text" 
+                            name="name"
+                            value={user.name || ''}
+                            placeholder="Nom"
+                            class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5"
+                        />
+
+                        <input 
+                            type="text" 
+                            name="surname"
+                            value={user.surname || ''}
+                            placeholder="Prénom"
+                            class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5"
+                        />
+                    </div>
+
+                    <label class="text-sm text-bleu mb-1">Adresse mail</label>
+                    <input 
+                        type="email" 
+                        name="email"
+                        value={user.email || ''}
+                        placeholder="Adresse mail"
+                        class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5"
+                    />
+
+                    <label class="text-sm text-bleu mb-1">Photo de profil</label>
+                    <input 
+                        type="file" 
+                        name="avatar"
+                        accept="image/*"
+                        class="px-2 py-2 border-2 border-bleu bg-white rounded-lg mb-2.5"
+                    />
+
+                    {user.coach && (
+                        <div class="flex flex-col">
+
+                            <label class="text-sm text-bleu mb-1">Votre description</label>
+                            <textarea 
+                                name="description"
+                                placeholder="Description"
+                                class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5 min-h-24"
+                            >{user.description || ''}</textarea>
+
+                            <label class="text-sm text-bleu mb-1">Pseudo</label>
+                            <input 
+                                type="text"
+                                name="pseudo"
+                                value={user.pseudo || ''}
+                                placeholder="Pseudo"
+                                class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5"
+                            />
+
+                            <label class="text-sm text-bleu mb-1">Votre Spécialisation</label>
+                            <select name="specialisation" class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5">
+                                <option value="">Spécialisation</option>
+                                {specialisations.map((spe) => (
+                                    <option value={spe} selected={user.specialisation === spe}>{spe}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    <button class="text-beige bg-bleu font-bold text-lg w-full rounded-xl py-1 cursor-pointer mt-2">
+                        Enregistrer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto">
+            <p class="text-bleu font-bold">Email: <span class="font-normal">{user.email}</span></p>
+            <p class="text-bleu font-bold mt-2">Utilisateur depuis: <span class="font-normal">{new Date(user.created).toLocaleDateString('fr-FR')}</span></p>
+        </div>
+
+        {user.coach && (
+            <>
+                <div class="bg-beige h-full flex flex-col justify-around rounded-[10px] border border-bleu overflow-auto p-2 w-9/10 mx-auto *:flex-1 *:my-3">
+                    <h2 class="text-bleu font-bold">Statistiques Coach</h2>
+                    <div class="flex w-9/10 mx-auto justify-around">
+                        <p>{nb_com} avis</p>
+                        <div class="flex place-items-center justify-around *:mx-1.5 w-5/10">
+                            <ProgressBar note={moyenne} color="bleu"/>
+                            <p>{moyenne}/5</p>
+                        </div>
+                    </div>
+                </div>
+                {fiche?.lien && (
+                    <a
+                        href={fiche.lien}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="block w-fit font-comforta font-bold bg-bleu text-beige mx-auto p-2.5 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100"
+                    >
+                        Voir mon profil coach
+                    </a>
+                )}
+
+                <div class="w-9/10 mx-auto">
+                    <h2>Avis reçus</h2>
+                    {commentaires.length === 0 ? (
+                        <p class="bg-beige text-bleu border-2 rounded-xl mx-auto mb-12 p-1 text-center">
+                            Aucun avis pour le moment
+                        </p>
+                    ):(
+                        <ul>
+                            {commentaires.map((com) => (
+                                <li><CardCommentaireCoach com={com}/></li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </>
+        )}
+    </main>
+    <script>
+        const fenetreEditUser = document.getElementById('edit-profile-user');
+        const btnEditUser = document.getElementById('edit-user');
+        const btnCloseUser = document.getElementById('closeUser');
+
+        btnEditUser?.addEventListener('click', () => {
+            fenetreEditUser?.classList.remove('opacity-0', 'pointer-events-none');
+            fenetreEditUser?.classList.add('flex', 'opacity-100');
+        });
+
+        const closefenetreEditUserl = () => {
+            fenetreEditUser?.classList.add('opacity-0', 'pointer-events-none');
+            fenetreEditUser?.classList.remove('flex', 'opacity-100');
+        };
+
+        btnCloseUser?.addEventListener('click', closefenetreEditUserl);
+        
+        fenetreEditUser?.addEventListener('click', (e) => {
+            if (e.target === fenetreEditUser) {
+                closefenetreEditUserl();
+            }
+        });
+
+    </script>
+</Layout>

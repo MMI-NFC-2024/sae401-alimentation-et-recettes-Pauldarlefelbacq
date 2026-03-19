@@ -10,6 +10,7 @@ type Props= {
     recette: RecettesResponse
 }
 const recette = Astro.props.recette;
+
 const tps = TpsTotal(recette.temps_cuisson, recette.temps_prep);
 const commentaires = await Astro.locals.pb.collection("Commentaires").getFullList({
     filter: `recette = "${recette.id}"`
@@ -32,7 +33,7 @@ const nb_com = commentaires.length;
         <div>
             <p>{ nb_com } avis</p>
             <div class="flex place-items-center justify-around *:mx-1.5 ">
-                <ProgressBar note={moyenne}/>
+                <ProgressBar note={moyenne} color="beige"/>
                 <p>{ moyenne }/5</p>
             </div>
         </div>

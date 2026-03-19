@@ -1,7 +1,11 @@
 ---
+interface Props {
+    color: string,
+}
+const {color="beige"} = Astro.props;
 const user = Astro.locals.pb.authStore;
 ---
-<header class="sticky top-5 bg-beige border border-bleu p-2 lg:py-4 md:text-base lg-text-xl rounded-xl w-7/10 mx-auto font-comforta text-sm">
+<header class=`sticky top-5 bg-${color} border border-bleu p-2 lg:py-4 md:text-base lg-text-xl rounded-xl w-7/10 mx-auto font-comforta text-sm`>
     <nav>
         <ul class="flex flex-wrap justify-around gap-2 *:hover:underline *:hover:font-bold *:hover:text-bleu *:active:text-bleu">
             <li><a data-nav-link href="/">Accueil</a></li>

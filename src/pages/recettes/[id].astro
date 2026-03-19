@@ -138,7 +138,7 @@ const nb_com = commentaires.length;
         <h1>{ recette.titre }</h1>
         <!-- img et créateur -->
         <section class="justify-items-end place-self-center grid w-9/10 mx-auto">
-            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5">Recette proposée par <a href="" class="text-bleu underline active:text-vert">{auteur.name}</a></p>
+            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5">Recette proposée par {auteur.coach ? <a href={`/coachs/${auteur.id}`} class="text-bleu underline active:text-vert">{auteur.surname}</a> : <span class="text-bleu underline active:text-vert">{auteur.surname}</span>}</p>
             <ImgPb
             record={recette}
             image={recette.image}

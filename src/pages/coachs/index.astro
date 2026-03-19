@@ -1,0 +1,37 @@
+---
+export const prerender = false
+import Layout from "../../layouts/Layout.astro";
+import CardCoach from "../../components/Card_coach.astro";
+import type { UsersResponse } from "../../pocketbase-types";
+
+const url = new URL(Astro.request.url);
+const search = url.searchParams.get("s") ?? "";
+
+const coachs = await Astro.locals.pb.collection("users").getFullList<UsersResponse>({
+    filter: 'coach = true',
+});
+---
+<Layout titre="Coachs">
+    <h1 class="mt-20">Coachs</h1>
+    <form action="/coachs" method="get">
+        <input 
+            type="search"
+            name="s"
+            value={search}
+            placeholder="Rechercher un coach..."
+        />
+        <button>Chercher</button>
+    </form>
+
+    {coachs.length === 0 ? (
+        <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
+            Aucun coach disponible pour le moment.
+        </p>
+    ) : (
+        <ul class="grid grid-cols-1 place-self-center justify-self-center *:my-5">
+            {coachs.map((coach) => (
+                <li class="place-self-center justify-self-center mx-auto"><CardCoach coach={coach} /></li>
+            ))}
+        </ul>
+    )}
+</Layout>

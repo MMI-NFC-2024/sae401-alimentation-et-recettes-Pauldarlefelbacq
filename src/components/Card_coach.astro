@@ -1,0 +1,54 @@
+---
+import ProgressBar from './Progress_bar.astro';
+import ImgPb from './ImgPb.astro';
+import type { CommentairesCoachResponse, FicheCoachResponse, UsersResponse } from '../pocketbase-types';
+
+type Props= {
+    coach: UsersResponse
+}
+const coach = Astro.props.coach;
+
+const commentaires = await Astro.locals.pb.collection("Commentaires_coach").getFullList<CommentairesCoachResponse>({
+    filter: `coach = "${coach.id}"`
+});
+const ficheCoach = await Astro.locals.pb.collection("Fiche_coach").getFullList<FicheCoachResponse>({
+    filter: `user = "${coach.id}"`
+});
+const fiche = ficheCoach[0];
+const moyenne = commentaires.length > 0
+    ? (Math.round((commentaires.reduce((sum, r) => sum + Number(r.note), 0) / commentaires.length) * 10)) / 10
+    : 0;
+const nb_com = commentaires.length;
+
+---
+<div class="bg-beige w-100 h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto">
+    <div class="m-1.5 *:my-1.5">
+        <p class="font-rampart text-2xl text-bleu">{ coach.name || coach.pseudo }</p>
+        <p class="text-base">@{ coach.pseudo }</p>
+        <div>
+            <p>{ nb_com } avis</p>
+            <div class="flex place-items-center justify-around *:mx-1.5 ">
+                <ProgressBar note={moyenne} color="beige"/>
+                <p>{ moyenne }/5</p>
+            </div>
+        </div>
+
+        <a
+            href={`/coachs/${coach.id}`}
+            rel="noreferrer"
+            class="inline-block bg-bleu text-beige font-bold p-2.5 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100"
+        >
+            Voir le profil
+        </a>
+    </div>
+
+    <div class="h-full">
+        <ImgPb
+            record={coach}
+            image={coach.avatar}
+            alt={`avatar de ${coach.name || coach.pseudo}`}
+            classPicture="w-full h-full"
+            classImg="w-full h-full object-cover"
+        />
+    </div>
+</div>

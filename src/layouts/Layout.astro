@@ -5,8 +5,9 @@ import Header from './Header.astro';
 
 interface Props {
 	titre: string,
+	color: string,
 }
-const { titre } = Astro.props;
+const { titre, color="beige" } = Astro.props;
 ---
 <html lang="fr">
 	<head>
@@ -19,8 +20,8 @@ const { titre } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>Spoonful | { titre }</title>
 	</head>
-	<body class="bg-[url(/grid_pattern.svg)] bg-repeat bg-beige">
-		<Header />
+	<body class=`bg-[url(/grid_pattern.svg)] bg-repeat bg-${color}`>
+		<Header color={color} />
 		<slot />
 	</body>
 </html>

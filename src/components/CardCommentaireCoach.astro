@@ -1,31 +1,24 @@
 ---
-import type { CommentairesResponse, UsersResponse } from '../pocketbase-types'
+import type { CommentairesCoachResponse, UsersResponse } from '../pocketbase-types'
 import ProgressBar from './Progress_bar.astro';
 
-type CommentaireWithUser = CommentairesResponse & {
+type CommentaireCoachWithUser = CommentairesCoachResponse & {
     expand?: {
         user?: UsersResponse;
     };
 };
 
 interface Props {
-    com: CommentaireWithUser;
+    com: CommentaireCoachWithUser;
 }
 const { com } = Astro.props;
 ---
-<div class="bg-vert border border-beige w-9/10 mx-auto rounded-xl p-3.5">
+<div class="bg-vert border border-bleu w-9/10 mx-auto rounded-xl p-3.5">
     {/* espace du haut */}
     <div class="flex justify-around">
         {/* Nom & statut */}
         <div class="flex-2">
             <a href="" class="text-xl text-bleu">{com.expand?.user?.name}</a>
-            {
-                com.expand?.user?.coach ? (
-                <p class="text-sm">coach</p>
-                ):(
-                <p class="text-sm">membre</p>
-                )
-            }
         </div>
         <div class="flex flex-1 place-items-baseline gap-2">
             <ProgressBar note={com.note} color='vert' />

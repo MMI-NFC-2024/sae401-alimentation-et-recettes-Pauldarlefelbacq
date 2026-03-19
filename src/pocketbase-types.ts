@@ -88,7 +88,6 @@ export type FavoriRecord = {
 }
 
 export type FicheCoachRecord = {
-	commentaires?: RecordIdString
 	created: IsoAutoDateString
 	id: string
 	lien?: string
@@ -205,17 +204,26 @@ export type IngredientsDansRecetteRecord = {
 	updated: IsoAutoDateString
 }
 
+export enum UsersSpecialisationOptions {
+	"nutritioniste" = "nutritioniste",
+	"diététicien" = "diététicien",
+	"mental" = "mental",
+	"motivation" = "motivation",
+}
 export type UsersRecord = {
 	admin?: boolean
 	avatar?: FileNameString
 	coach?: boolean
 	created: IsoAutoDateString
+	description?: string
 	email: string
 	emailVisibility?: boolean
 	id: string
 	name?: string
 	password: string
 	pseudo?: string
+	specialisation?: UsersSpecialisationOptions
+	surname?: string
 	tokenKey: string
 	updated: IsoAutoDateString
 	verified?: boolean
