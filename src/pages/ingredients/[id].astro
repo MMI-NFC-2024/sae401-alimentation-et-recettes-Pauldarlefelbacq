@@ -3,7 +3,6 @@ import ImgPb from '../../components/ImgPb.astro';
 import Layout from '../../layouts/Layout.astro';
 import type { IngredientsDansRecetteResponse, IngredientsResponse, RecettesResponse } from '../../pocketbase-types';
 
-export const prerender = false;
 
 const { id } = Astro.params as { id: string };
 type IngredientDansRecetteWithExpand = IngredientsDansRecetteResponse & {

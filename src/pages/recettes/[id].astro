@@ -9,7 +9,6 @@ import Arrow from "../../assets/arrow.svg";
 import { formatHeure, checkHeure } from "../../utils/helper";
 import { type UsersResponse, type CommentairesResponse, type RecettesResponse, type IngredientsDansRecetteResponse, type IngredientsResponse, type EtapesPrepResponse } from "../../pocketbase-types";
 import CardCommentaire from "../../components/CardCommentaire.astro";
-export const prerender = false;
 
 type RecetteWithUser = RecettesResponse & {
     expand?: {

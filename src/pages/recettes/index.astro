@@ -2,7 +2,6 @@
 import CardRecette from "../../components/Card_recette.astro";
 import Layout from "../../layouts/Layout.astro";
 import { RecettesTypeOptions } from "../../pocketbase-types";
-export const prerender = false;
 
 const recettes = await Astro.locals.pb.collection("Recettes").getFullList();
 const categories = Object.values(RecettesTypeOptions);

@@ -1,7 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import CardIngredients from "../../components/CardIngredients.astro";
-export const prerender = false;
 
 const ingredients = await Astro.locals.pb.collection("Ingredients").getFullList();
 ---
