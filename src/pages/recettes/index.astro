@@ -9,6 +9,7 @@ const categories = Object.values(RecettesTypeOptions);
 const url = new URL(Astro.request.url);
 const search = url.searchParams.get("s") ?? "";
 const type = url.searchParams.get("t") ?? "";
+const page = url.searchParams.get("p") ?? "";
 
 const hasFilters = search.trim() !== "" || type.trim() !== "";
 
@@ -32,7 +33,7 @@ const recettesFilter = recettes.filter((i) => {
             class="grid w-2/3 border-2 border-bleu rounded-lg bg-white my-5 mx-auto px-2 py-1 font-comforta"
         />
         <input type="hidden" name="t" value={type} />
-        <div class="flex">
+        <div class="flex place-items-center">
             <button
                 type="submit"
                 class="bg-bleu text-beige p-2 rounded-xl border hover:bg-beige hover:text-bleu transition-all duration-100 h-fit"
@@ -47,13 +48,25 @@ const recettesFilter = recettes.filter((i) => {
             </a>
         </div>
     </form>
-    <div class="grid flex-col flex-wrap mx-auto w-fit mb-10 *:my-1.5 justify-items-center">
-        <div>
+
+    {Astro.locals.pb.authStore.isValid ? (
+        <a href="/recettes/edit/" class="text-3xl block bg-bleu text-beige p-3.5 w-fit justify-self-center mx-auto rounded-xl border hover:bg-beige hover:text-bleu transition-all duration-150">Ajouter une recette</a>
+    ):(
+        <a href="/authpassword" class="block text-bleu underline w-fit justify-self-center mx-auto hover:decoration-0">Connectez vous pour partager une recette</a>
+    )}
+
+    <button id="filter-activation" class="bg-bleu text-beige text-center font-bold p-2.5 rounded-full mx-2.5 border hover:bg-beige hover:text-bleu transition-all duration-100">
+        Filtrer
+    </button>
+
+    <div id="filter-panel" class="hidden grid grid-cols-1 bg-white rounded-lg p-5 max-w-md w-full absolute left-1/2 -translate-1/2 gap-2">
+        <button id="close-filter" class="absolute top-1 left-1  text-2xl text-bleu font-bold">×</button>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
             {
             categories.map((cat) => (
                 <a
                     href={`/recettes?t=${cat}${search ? `&s=${encodeURIComponent(search)}` : ""}`}
-                    class="bg-bleu text-beige font-bold p-2.5 rounded-full mx-2.5 border hover:bg-beige hover:text-bleu transition-all duration-100"
+                    class="bg-bleu text-beige text-center font-bold p-2.5 rounded-full mx-2.5 border hover:bg-beige hover:text-bleu transition-all duration-100 w-auto"
                 >
                     {cat}
                 </a>
@@ -62,7 +75,7 @@ const recettesFilter = recettes.filter((i) => {
         </div>
         <a 
             href={`/recettes${search ? `?s=${encodeURIComponent(search)}` : "" }`}
-            class="bg-bleu text-beige font-bold p-2.5 w-fit rounded-full mx-2.5 border hover:bg-beige hover:text-bleu transition-all duration-100"
+            class="bg-bleu text-beige font-bold p-2.5 w-fit h-fit rounded-full mx-2.5 border hover:bg-beige hover:text-bleu transition-all duration-100"
         >
             Réinitialiser
         </a>
@@ -91,9 +104,33 @@ const recettesFilter = recettes.filter((i) => {
         </ul>
     )}
      
-    { 
-    Astro.locals.pb.authStore.isValid &&
-    <a href="/recettes/edit/" class="text-3xl block bg-bleu text-beige p-3.5 w-fit justify-self-center mx-auto rounded-xl border hover:bg-beige hover:text-bleu transition-all duration-150">Ajouter une recette</a>
-    }
-   
+    
+   <script>
+    const filterButton = document.getElementById("filter-activation");
+    const closeFilterButton = document.getElementById("close-filter");
+    const filterPanel = document.getElementById("filter-panel");
+
+    filterButton?.addEventListener('click', () => {
+        if(filterPanel?.classList.contains("hidden"))
+        {
+            filterPanel?.classList.remove("hidden")
+        }
+        else
+        {
+            filterPanel?.classList.add("hidden")
+        }
+    });
+
+    const closeFilterPanelButton = () =>{
+        filterPanel?.classList.add("hidden")
+    };
+    closeFilterButton?.addEventListener('click',closeFilterPanelButton);
+
+    filterPanel?.addEventListener('click', (e) => {
+            if (e.target !== filterPanel) {
+                closeFilterPanelButton();
+            }
+        });
+   </script>
+
 </Layout>

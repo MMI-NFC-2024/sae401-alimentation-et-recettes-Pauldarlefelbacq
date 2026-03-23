@@ -1,13 +1,152 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Arrow from "../assets/arrow.svg";
+import ImgPb from "../components/ImgPb.astro";
+import type { RecettesResponse, UsersResponse, CommentairesCoachResponse } from "../pocketbase-types";
+import { TpsTotal, formatHeure, checkHeure } from "../utils/helper";
+import ProgressBar from "../components/Progress_bar.astro";
+
+const recettes = await Astro.locals.pb.collection("Recettes").getList<RecettesResponse>(1, 5);
+const coachs = await Astro.locals.pb.collection("users").getList<UsersResponse>(1, 3, {
+	filter: "coach = true",
+});
+
+const coachStats: Record<string, { moyenne: number; nbAvis: number }> = {};
+
+coachs.items.forEach((coach) => {
+	coachStats[coach.id] = { moyenne: 0, nbAvis: 0 };
+});
+
+if (coachs.items.length > 0) {
+	const coachFilter = coachs.items.map((coach) => `coach = "${coach.id}"`).join(" || ");
+	const commentaires = await Astro.locals.pb.collection("Commentaires_coach").getFullList<CommentairesCoachResponse>({
+		filter: coachFilter,
+	});
+
+	const sums: Record<string, { total: number; count: number }> = {};
+
+	commentaires.forEach((com) => {
+		if (!com.coach) return;
+		if (!sums[com.coach]) {
+			sums[com.coach] = { total: 0, count: 0 };
+		}
+
+		sums[com.coach].total += Number(com.note) || 0;
+		sums[com.coach].count += 1;
+	});
+
+	Object.entries(sums).forEach(([coachId, value]) => {
+		coachStats[coachId] = {
+			moyenne: value.count > 0 ? Math.round((value.total / value.count) * 10) / 10 : 0,
+			nbAvis: value.count,
+		};
+	});
+}
 ---
-<Layout titre = "Accueil">
+<Layout titre = "Accueil" color="beige">
 	<div class="h-lvh">
 		<h1 class="text-9xl text-bleu text-left w-9/10 mt-24 md:text-[13.75rem]">Envie de mieux manger</h1>
 		<img class="mx-auto mt-20" src={Arrow.src} alt="fleche vers le bas" />
 	</div>
 	<section>
+		<h1>Alors vous êtes au bon endroit</h1>
+	</section>
+
+	<section>
+		<h2 class="w-9/10 mx-auto text-3xl font-bold my-5">Venez découvrir nos dernières recettes</h2>
+		<div class="relative w-9/10 mx-auto">
+			<button
+				id="home-carousel-prev"
+				type="button"
+				class="lg:hidden absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-bleu text-beige w-10 h-10 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100"
+				aria-label="Recette précédente"
+			>
+				‹
+			</button>
+
+			<div id="home-carousel" class="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory px-12 py-2">
+				{recettes.items.map((recette) => (
+					<a href={`/recettes/${recette.id}`} class="snap-start shrink-0 w-75 bg-beige border border-bleu rounded-xl overflow-hidden hover:-translate-y-0.5 transition-all duration-100">
+						<ImgPb
+							record={recette}
+							image={recette.image}
+							alt={`image de ${recette.titre}`}
+							classPicture="h-48 w-full"
+							classImg="h-full w-full object-cover"
+						/>
+						<div class="p-4 *:my-1">
+							<p class="text-2xl text-bleu font-rampart">{recette.titre}</p>
+							<p class="text-sm font-bold text-bleu">{recette.type || "Type non défini"}</p>
+							<p class="text-sm">Temps total : <span class="font-bold">{formatHeure(TpsTotal(recette.temps_prep, recette.temps_cuisson))}{checkHeure(TpsTotal(recette.temps_prep, recette.temps_cuisson)) ? "h" : "mins"}</span></p>
+							<p class="text-sm">Pour <span class="font-bold">{recette.nb_personnes ?? "?"}</span> personne(s)</p>
+							<p class="line-clamp-3">{recette.description || "Découvrez cette recette sur Spoonful."}</p>
+						</div>
+					</a>
+				))}
+			</div>
+
+			<button
+				id="home-carousel-next"
+				type="button"
+				class="lg:hidden absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-bleu text-beige w-10 h-10 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100"
+				aria-label="Recette suivante"
+			>
+				›
+			</button>
+		</div>
+		<a href="/recettes" class="block w-fit mx-auto mt-5 bg-bleu text-beige font-bold p-2.5 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100">Voir toutes nos recettes</a>
+	</section>
+
+	<section>
+		<h2 class="w-9/10 mx-auto text-3xl font-bold my-5">Venez découvrir nos coachs d'exception triés sur le volet</h2>
+		{coachs.items.length === 0 ? (
+			<p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
+				Aucun coach disponible pour le moment.
+			</p>
+		) : (
+			<div class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+				{coachs.items.map((coach) => (
+					<a href={`/coachs/${coach.id}`} class="bg-beige border border-bleu rounded-xl overflow-hidden hover:-translate-y-0.5 transition-all duration-100">
+						<ImgPb
+							record={coach}
+							image={coach.avatar}
+							alt={`avatar de ${coach.name || coach.pseudo}`}
+							classPicture="h-48 w-full"
+							classImg="h-full w-full object-cover"
+						/>
+						<div class="p-4 *:my-1">
+							<p class="text-2xl text-bleu font-rampart">{coach.name} {coach.surname}</p>
+							<p class="text-sm font-bold text-bleu">@{coach.pseudo}</p>
+							<p class="text-sm">Spécialité : <span class="font-bold">{coach.specialisation || "Non renseignée"}</span></p>
+							<div>
+								<p>Satisfaction ({coachStats[coach.id]?.nbAvis ?? 0} avis)</p>
+								<ProgressBar note={coachStats[coach.id]?.moyenne ?? 0} color="beige" />
+								<p class="text-sm font-bold text-bleu mt-1">{coachStats[coach.id]?.moyenne ?? 0}/5</p>
+							</div>
+						</div>
+					</a>
+				))}
+			</div>
+		)}
+		<a href="/coachs" class="block w-fit mx-auto mt-5 bg-bleu text-beige font-bold p-2.5 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100">
+			Voir tous nos coachs
+		</a>
+	</section>
+	<section>
 		
 	</section>
+
+	<script>
+		const carousel = document.getElementById("home-carousel");
+		const prevButton = document.getElementById("home-carousel-prev");
+		const nextButton = document.getElementById("home-carousel-next");
+
+		const scrollByCard = (direction: number) => {
+			if (!carousel) return;
+			carousel.scrollBy({ left: direction * 320, behavior: "smooth" });
+		};
+
+		prevButton?.addEventListener("click", () => scrollByCard(-1));
+		nextButton?.addEventListener("click", () => scrollByCard(1));
+	</script>
 </Layout>

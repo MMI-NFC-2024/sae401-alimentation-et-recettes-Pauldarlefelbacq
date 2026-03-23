@@ -18,7 +18,15 @@ const { com } = Astro.props;
     <div class="flex justify-around">
         {/* Nom & statut */}
         <div class="flex-2">
-            <a href="" class="text-xl text-bleu">{com.expand?.user?.name}</a>
+            {
+                com.expand?.user?.coach ? (
+                <a href={`/coachs/${com.expand?.user?.id}`} class="text-xl text-bleu">{com.expand?.user?.name}</a>
+                <p class="text-sm">coach</p>
+                ):(
+                <p class="text-xl text-bleu">{com.expand?.user?.name}</p>
+                <p class="text-sm">membre</p>
+                )
+            }
         </div>
         <div class="flex flex-1 place-items-baseline gap-2">
             <ProgressBar note={com.note} color='vert' />

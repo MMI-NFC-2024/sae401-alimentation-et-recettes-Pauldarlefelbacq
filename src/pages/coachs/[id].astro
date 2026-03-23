@@ -98,7 +98,7 @@ if (Astro.request.method === "POST")
                     Aucun commentaires
                 </p>
             ):(
-                <ul>
+            <ul class="*:my-2">
                 {commentaires.map((com) => (
                     <li><CardCommentaireCoach com={com}/></li>
                 ))}

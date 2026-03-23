@@ -18,7 +18,6 @@ const { com } = Astro.props;
     <div class="flex justify-around">
         {/* Nom & statut */}
         <div class="flex-2">
-            
             {
                 com.expand?.user?.coach ? (
                 <a href={`/coachs/${com.expand?.user?.id}`} class="text-xl text-bleu">{com.expand?.user?.name}</a>
