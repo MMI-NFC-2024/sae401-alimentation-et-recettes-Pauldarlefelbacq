@@ -3,6 +3,33 @@ import CardRecette from "../../components/Card_recette.astro";
 import Layout from "../../layouts/Layout.astro";
 import { RecettesTypeOptions } from "../../pocketbase-types";
 
+if (Astro.request.method === "POST") {
+    const userId = Astro.locals.pb.authStore.record?.id;
+    const formData = await Astro.request.formData();
+    const recetteId = String(formData.get("recetteId") ?? "").trim();
+
+    if (userId && recetteId) {
+        try {
+            const existing = await Astro.locals.pb.collection("Favori").getList(1, 1, {
+                filter: `user = "${userId}" && recette = "${recetteId}"`,
+            });
+
+            if (existing.items.length > 0) {
+                await Astro.locals.pb.collection("Favori").delete(existing.items[0].id);
+            } else {
+                await Astro.locals.pb.collection("Favori").create({
+                    user: userId,
+                    recette: recetteId,
+                });
+            }
+        } catch (error) {
+            console.error("Favori toggle error:", error);
+        }
+    }
+
+    return Astro.redirect(Astro.url.pathname + Astro.url.search, 303);
+}
+
 const recettes = await Astro.locals.pb.collection("Recettes").getFullList();
 const categories = Object.values(RecettesTypeOptions);
 const url = new URL(Astro.request.url);

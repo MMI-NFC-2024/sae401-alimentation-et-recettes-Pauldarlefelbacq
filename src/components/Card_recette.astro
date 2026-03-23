@@ -27,36 +27,47 @@ const isFavorite = userId
     })).items.length > 0
     : false;
 
+
 ---
-<a href=`/recettes/${recette.id}`
-    class="bg-beige w-100 h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto"
->
-    <div class="m-1.5 *:my-1.5">
-        <p class="font-rampart text-2xl text-bleu">{ recette.titre }</p>
-        <div class="text-right">
-            <p class="text-base">Tps préparation</p>
-            <p class="text-bleu font-bold">{ formatHeure(tps) } { checkHeure(tps) ? ("h"):("mins")}</p>
-        </div>
-        <Button texte={recette.type} />
-        <div>
-            <p>{ nb_com } avis</p>
-            <div class="flex place-items-center justify-around *:mx-1.5 ">
-                <ProgressBar note={moyenne} color="beige"/>
-                <p>{ moyenne }/5</p>
+<div class="relative">
+    <a href={`/recettes/${recette.id}`}
+        class="bg-beige w-100 h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto"
+    >
+        <div class="m-1.5 *:my-1.5">
+            <p class="font-rampart text-2xl text-bleu">{ recette.titre }</p>
+            <div class="text-right">
+                <p class="text-base">Tps préparation</p>
+                <p class="text-bleu font-bold">{ formatHeure(tps) } { checkHeure(tps) ? ("h"):("mins")}</p>
+            </div>
+            <Button texte={recette.type} />
+            <div>
+                <p>{ nb_com } avis</p>
+                <div class="flex place-items-center justify-around *:mx-1.5 ">
+                    <ProgressBar note={moyenne} color="beige"/>
+                    <p>{ moyenne }/5</p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="relative h-full">
-        <ImgPb
-            record={recette}
-            image={recette.image}
-            alt={`image de ${recette.titre}`}
-            classPicture="w-full h-full"
-            classImg="w-full h-full object-cover"
-        />
-        <Heart
-            class={`absolute top-2 right-2 size-10 **:stroke-bleu ${isFavorite ? "**:fill-beige": " **:stroke-bleu"
-            }`}
-        />
-    </div>
-</a>
+        <div class="h-full">
+            <ImgPb
+                record={recette}
+                image={recette.image}
+                alt={`image de ${recette.titre}`}
+                classPicture="w-full h-full"
+                classImg="w-full h-full object-cover"
+            />
+        </div>
+    </a>
+
+    {userId && (
+        <form method="POST" action={Astro.url.pathname + Astro.url.search} class="absolute top-2 right-2 z-10">
+            <input type="hidden" name="recetteId" value={recette.id} />
+            <button type="submit" class="cursor-pointer">
+                <Heart
+                    class={`size-10 [&_path]:stroke-bleu ${isFavorite ? "[&_path]:fill-bleu " : "[&_path]:fill-transparent"
+                    }`}
+                />
+            </button>
+        </form>
+    )}
+</div>

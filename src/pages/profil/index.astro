@@ -237,6 +237,35 @@ if (recettesUser.length > 0) {
             <p class="text-bleu font-bold mt-2">Utilisateur depuis: <span class="font-normal">{new Date(user.created).toLocaleDateString('fr-FR')}</span></p>
         </div>
 
+        <div id="recettes" class="hidden bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto max-h-72 overflow-auto">
+            <h2>Vos recettes</h2>
+            {recettesUser.length === 0 ? (
+                <p>Vous n'aves pas encore posté de recette, pourquoi pas <a href="/recettes/add" class="text-bleu underline hover:decoration-0">commencer maintenant</a> ?</p>
+            ):(
+                <ul class="*:my-2.5">
+                    {recettesUser.map((recette) => (
+                        <li class="bg-beige border border-bleu rounded-xl p-3">
+                            <div class="flex flex-wrap justify-between gap-2 place-items-center">
+                                <a href={`/recettes/${recette.id}`} class="text-bleu text-xl font-bold underline hover:decoration-0">{recette.titre}</a>
+                                <div class="text-right">
+                                    <p>{recetteStats[recette.id]?.nbAvis ?? 0} avis</p>
+                                    <p class="font-bold text-bleu">{recetteStats[recette.id]?.moyenne ?? 0}/5</p>
+                                </div>
+                            </div>
+                            <div class="*:my-2">
+                                <a href={`recettes/edit/${recette.id}`} class="bg-bleu text-beige border p-2 rounded-xl hover:bg-beige hover:text-bleu">Editer la recette</a>
+                                <form method="post">
+                                    <input type="hidden" name="recette" value={recette.id}/>
+                                    <input type="hidden" name="delete" value="true">
+                                    <button type="submit" class="text-beige bg-red-400 border p-2 rounded-xl hover:text-red-400 hover:bg-beige">Supprimer</button>
+                                </form>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+
         {user.coach && (
             <>
                 <div class="bg-beige h-full flex flex-col justify-around rounded-[10px] border border-bleu overflow-auto p-2 w-9/10 mx-auto *:flex-1 *:my-3">
@@ -276,36 +305,6 @@ if (recettesUser.length > 0) {
                 </div>
             </>
         )}
-
-        <div id="recettes" class="hidden bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto max-h-72 overflow-auto">
-            <h2>Vos recettes</h2>
-            {recettesUser.length === 0 ? (
-                <p>Vous n'aves pas encore posté de recette, pourquoi pas <a href="/recettes/add" class="text-bleu underline hover:decoration-0">commencer maintenant</a> ?</p>
-            ):(
-                <ul class="*:my-2.5">
-                    {recettesUser.map((recette) => (
-                        <li class="bg-beige border border-bleu rounded-xl p-3">
-                            <div class="flex flex-wrap justify-between gap-2 place-items-center">
-                                <a href={`/recettes/${recette.id}`} class="text-bleu text-xl font-bold underline hover:decoration-0">{recette.titre}</a>
-                                <div class="text-right">
-                                    <p>{recetteStats[recette.id]?.nbAvis ?? 0} avis</p>
-                                    <p class="font-bold text-bleu">{recetteStats[recette.id]?.moyenne ?? 0}/5</p>
-                                </div>
-                            </div>
-                            <div class="*:my-2">
-                                <a href={`recettes/edit/${recette.id}`} class="bg-bleu text-beige border p-2 rounded-xl hover:bg-beige hover:text-bleu">Editer la recette</a>
-                                <form method="post">
-                                    <input type="hidden" name="recette" value={recette.id}/>
-                                    <input type="hidden" name="delete" value="true">
-                                    <button type="submit" class="text-beige bg-red-400 border p-2 rounded-xl hover:text-red-400 hover:bg-beige">Supprimer</button>
-                                </form>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-
     </main>
     <script>
         const fenetreEditUser = document.getElementById('edit-profile-user');
