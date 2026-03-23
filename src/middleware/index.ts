@@ -3,7 +3,7 @@ import PocketBase from 'pocketbase';
 import { defineMiddleware } from 'astro/middleware';
 
 export const onRequest = defineMiddleware(async ({ locals, request, isPrerendered }, next: () => any) => {
-    locals.pb = new PocketBase("http://127.0.0.1:8090");
+    locals.pb = new PocketBase("https://spoonful-sae-414.pauldarlef.fr:443");
     locals.pb.autoCancellation(false);
 
     if (!isPrerendered) {// load the store data from the request cookie string

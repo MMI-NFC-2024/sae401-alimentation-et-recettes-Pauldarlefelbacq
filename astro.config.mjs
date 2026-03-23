@@ -14,7 +14,7 @@ export default defineConfig({
   },
 
   image: {
-    domains: ['r414-recettes-cuisine.pauldarlef.fr']
+    domains: ['spoonful-sae-414.pauldarlef.fr']
   },
 
   vite: {

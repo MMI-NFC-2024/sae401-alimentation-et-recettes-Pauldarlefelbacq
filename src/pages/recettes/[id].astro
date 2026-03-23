@@ -138,28 +138,28 @@ let gluPers = glucides / recette.nb_personnes;
 const nb_com = commentaires.length;
 
 ---
-<Layout titre={recette.titre}>
-    <main class="*:my-5">
-        <a href="/recettes">
+<Layout titre={recette.titre} color="beige">
+    <main class="mx-auto max-w-6xl *:my-6 md:*:my-8">
+        <a href="/recettes" class="block w-fit ml-3 md:ml-6">
             <Arrow class="rotate-90 size-20 mt-3 hover:*:fill-vert hover:*:stroke-bleu" />
         </a>
-        <h1>{ recette.titre }</h1>
+        <h1 class="w-11/12 md:w-9/10 mx-auto">{ recette.titre }</h1>
         <!-- img et créateur -->
-        <section class="justify-items-end place-self-center grid w-9/10 mx-auto">
-            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5">Recette proposée par {auteur.coach ? <a href={`/coachs/${auteur.id}`} class="text-bleu underline active:text-vert">{auteur.surname}</a> : <span class="text-bleu underline active:text-vert">{auteur.surname}</span>}</p>
+        <section class="justify-items-end place-self-center grid w-11/12 md:w-9/10 mx-auto">
+            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5 text-sm md:text-base">Recette proposée par {auteur.coach ? <a href={`/coachs/${auteur.id}`} class="text-bleu underline active:text-vert">{auteur.surname}</a> : <span class="text-bleu underline active:text-vert">{auteur.surname}</span>}</p>
             <ImgPb
             record={recette}
             image={recette.image}
             alt={`image de ${recette.titre}`}
             classPicture="w-full h-full mx-auto"
-            classImg="w-full h-[250px] object-cover rounded-xl"/>
+            classImg="w-full h-[250px] md:h-[360px] object-cover rounded-xl"/>
         </section>
-        <section class="flex place-items-center justify-around">
+        <section class="flex flex-wrap gap-4 place-items-center justify-center md:justify-around w-11/12 md:w-9/10 mx-auto">
             <Button texte={recette.type}/>
             <a href="#commentaires" class="text-bleu font-bold underline">{nb_com} avis</a>
         </section>
         <!-- Tps nécéssaire -->
-        <section class="flex place-items-center justify-around bg-beige border border-bleu rounded-xl w-fit gap-12 px-5 py-1 mx-auto">
+        <section class="flex place-items-center justify-around bg-beige border border-bleu rounded-xl w-11/12 md:w-9/10 gap-6 md:gap-12 px-5 py-2 mx-auto">
             <div class="flex flex-col place-items-center">
                 <div>
                     Cuisson
@@ -189,21 +189,21 @@ const nb_com = commentaires.length;
         </section>
         <!-- Description -->
         <section>
-            <h2 class="w-9/10 mx-auto">Description</h2>
-            <p class="bg-beige border border-bleu rounded-xl p-3.5 w-9/10 mx-auto">{recette.description}</p>
+            <h2 class="w-11/12 md:w-9/10 mx-auto">Description</h2>
+            <p class="bg-beige border border-bleu rounded-xl p-3.5 md:p-5 w-11/12 md:w-9/10 mx-auto">{recette.description}</p>
         </section>
         <!-- Ingrédients -->
         <section>
             <div>
-                <div class="flex justify-between place-items-center w-9/10 mx-auto mb-2.5">
-                    <h2 class="w-9/10 mx-auto">Ingrédients</h2>
-                    <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
+                <div class="flex flex-col md:flex-row md:justify-between md:place-items-center gap-2 w-11/12 md:w-9/10 mx-auto mb-2.5">
+                    <h2 class="w-full">Ingrédients</h2>
+                    <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg self-end md:self-auto">
                         <button id="moins" class="flex-1 cursor-pointer"><Moins /></button>
                         <button id="nb-pers" class="grow whitespace-nowrap bg-bleu text-beige h-full">{nbPers} personnes</button>
                         <button id="plus" class="flex-1 cursor-pointer"><Plus /></button>
                     </div>
                 </div>
-                <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
+                <ul class="grid grid-cols-2 bg-beige w-11/12 md:w-9/10 mx-auto p-3.5 md:p-5 border border-bleu rounded-xl">
                     {
                         ingredients.map((ing) => (
                         <li>{ing.expand?.ingredient?.nom}</li>
@@ -223,9 +223,9 @@ const nb_com = commentaires.length;
         </section>
         <!-- Valeurs nutritionnelles -->
         <section>
-            <h2 class="w-9/10 mx-auto">Valeurs nutritionnelles</h2>
+            <h2 class="w-11/12 md:w-9/10 mx-auto">Valeurs nutritionnelles</h2>
             <div>
-                <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
+                <ul class="grid grid-cols-2 bg-beige w-11/12 md:w-9/10 mx-auto p-3.5 md:p-5 border border-bleu rounded-xl">
                     <li>Calories</li>
                     <li id="calories-value" class="justify-self-end">{ Math.round((calPers) * nbPers) } Kcal</li>
                     <li>Protéines</li>
@@ -239,11 +239,11 @@ const nb_com = commentaires.length;
         </section>
         <!-- Etapes de préparation -->
         <section>
-            <h2 class="w-9/10 mx-auto">Préparation</h2>
-            <ul>
+            <h2 class="w-11/12 md:w-9/10 mx-auto">Préparation</h2>
+            <ul class="w-11/12 md:w-9/10 mx-auto md:grid md:grid-cols-2 md:gap-4">
                 {
                     preparation.map((prep, index) => (
-                    <li class="bg-beige w-9/10 mx-auto border border-bleu rounded-xl my-2.5 p-3.5">
+                    <li class="bg-beige border border-bleu rounded-xl my-2.5 md:my-0 p-3.5">
                         <p class="text-xl text-bleu underline">Étape {index + 1}</p>
                         <p>{prep.contenu}</p>
                     </li>
@@ -253,8 +253,8 @@ const nb_com = commentaires.length;
         </section>
         <!-- Commentaires -->
         <section id="commentaires">
-            <h2 class="w-9/10 mx-auto">Commentaires</h2>
-            <div class="*:my-5">
+            <h2 class="w-11/12 md:w-9/10 mx-auto">Commentaires</h2>
+            <div class="w-11/12 md:w-9/10 mx-auto *:my-5 md:grid md:grid-cols-2 md:gap-4 md:*:my-0">
                 {
                     commentaires.map((com) => (
                     <CardCommentaire com={com} />
@@ -264,8 +264,8 @@ const nb_com = commentaires.length;
         </section>
         <section>
             {Astro.locals.pb.authStore.isValid ? (
-                <h2 class="w-9/10 mx-auto">Poster un commentaire</h2>
-                <form method="POST" action={Astro.url.pathname} class="flex flex-col *:my-1.5 w-9/10 mx-auto">
+                <h2 class="w-11/12 md:w-9/10 mx-auto">Poster un commentaire</h2>
+                <form method="POST" action={Astro.url.pathname} class="flex flex-col *:my-1.5 w-11/12 md:w-9/10 mx-auto">
                     <label>
                         <span>Note</span>
                         <input 
