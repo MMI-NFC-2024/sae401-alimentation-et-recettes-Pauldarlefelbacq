@@ -21,9 +21,11 @@ const { titre, color="beige" } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>Spoonful | { titre }</title>
 	</head>
-	<body class=`bg-[url(/grid_pattern.svg)] bg-repeat bg-${color} min-h-lvh`>
+	<body class={`bg-[url(/grid_pattern.svg)] bg-repeat bg-${color} min-h-screen flex flex-col`}>
 		<Header color={color} />
-		<slot />
+		<div class="flex-1">
+			<slot />
+		</div>
 		<Footer color={color} />
 	</body>
 </html>
