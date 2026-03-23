@@ -1,0 +1,86 @@
+---
+import ImgPb from '../../components/ImgPb.astro';
+import Layout from '../../layouts/Layout.astro';
+import type { IngredientsDansRecetteResponse, IngredientsResponse, RecettesResponse } from '../../pocketbase-types';
+
+export const prerender = false;
+
+const { id } = Astro.params as { id: string };
+type IngredientDansRecetteWithExpand = IngredientsDansRecetteResponse & {
+    expand?: {
+        recette?: RecettesResponse;
+    };
+};
+
+const ing = await Astro.locals.pb.collection("Ingredients").getOne<IngredientsResponse>(id);
+const recettesIng = await Astro.locals.pb.collection("ingredients_dans_recette").getFullList<IngredientDansRecetteWithExpand>({
+    expand: 'recette, ingredient',
+    filter: `ingredient = "${ing.id}"`
+});
+
+const relatedRecettes = recettesIng.filter((item) => item.expand?.recette);
+---
+<Layout titre={ing.nom} color="beige">
+    <main class="mt-20 *:mb-8">
+        <section class="w-9/10 mx-auto bg-beige border border-bleu rounded-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+            <ImgPb
+                record={ing}
+                image={ing.image}
+                alt={`image de ${ing.nom}`}
+                classPicture="h-70 md:h-90 w-full"
+                classImg="h-full w-full object-cover"
+            />
+
+            <div class="p-5 *:my-2">
+                <h1 class="text-4xl text-bleu text-left mt-0">{ing.nom || "Ingrédient"}</h1>
+                <p class="font-bold text-bleu">Type : {ing.type || "Non défini"}</p>
+                <p>{ing.unitaire ? "Valeurs indiquées par unité." : "Valeurs indiquées pour 100g."}</p>
+            </div>
+        </section>
+
+        <section class="w-9/10 mx-auto">
+            <h2>Valeurs nutritionnelles</h2>
+            <ul class="bg-beige border border-bleu rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <li class="bg-vert rounded-lg p-3">
+                    <p class="text-bleu font-bold">Calories</p>
+                    <p>{ing.calories ?? 0} kcal</p>
+                </li>
+                <li class="bg-vert rounded-lg p-3">
+                    <p class="text-bleu font-bold">Matières grasses</p>
+                    <p>{ing.mat_grasses ?? 0} g</p>
+                </li>
+                <li class="bg-vert rounded-lg p-3">
+                    <p class="text-bleu font-bold">Protéines</p>
+                    <p>{ing.proteines ?? 0} g</p>
+                </li>
+                <li class="bg-vert rounded-lg p-3">
+                    <p class="text-bleu font-bold">Glucides</p>
+                    <p>{ing.glucides ?? 0} g</p>
+                </li>
+            </ul>
+        </section>
+
+        <section class="w-9/10 mx-auto">
+            <h2>Recettes avec cet ingrédient</h2>
+            {relatedRecettes.length === 0 ? (
+                <p class="bg-beige text-bleu border-2 border-bleu rounded-xl p-2 text-center">
+                    Aucune recette n'utilise cet ingrédient pour le moment.
+                </p>
+            ) : (
+                <ul class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {relatedRecettes.map((item) => (
+                        <li class="bg-vert rounded-xl p-3 flex items-center justify-between gap-3">
+                            <div>
+                                <a href={`/recettes/${item.expand?.recette?.id}`} class="text-bleu font-bold underline">
+                                    {item.expand?.recette?.titre || "Recette"}
+                                </a>
+                                <p class="text-sm">{item.expand?.recette?.type || "Type non défini"}</p>
+                            </div>
+                            <p class="text-sm font-bold whitespace-nowrap">{item.quantite} {item.unite}</p>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </section>
+    </main>
+</Layout>

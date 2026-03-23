@@ -82,6 +82,8 @@ if (Astro.request.method === "POST")
 }
 
 //Nutrition long et répétitif...
+let nbPers = recette.nb_personnes;
+
 let calories = 0;
 ingredients.forEach((ing) => {
     if (ing.expand?.ingredient?.unitaire)
@@ -93,6 +95,8 @@ ingredients.forEach((ing) => {
         calories += ing.expand.ingredient.calories * (ing.quantite / 100)
     }
 });
+let calPers = calories / recette.nb_personnes;
+
 let mat_grasses = 0;
 ingredients.forEach((ing) => {
     if (ing.expand?.ingredient?.unitaire)
@@ -104,6 +108,8 @@ ingredients.forEach((ing) => {
         mat_grasses += ing.expand.ingredient?.mat_grasses * (ing.quantite / 100)
     }
 });
+let matGPers = mat_grasses / recette.nb_personnes;
+
 let proteines = 0;
 ingredients.forEach((ing) => {
     if (ing.expand?.ingredient?.unitaire)
@@ -115,6 +121,8 @@ ingredients.forEach((ing) => {
         proteines += ing.expand.ingredient.proteines * (ing.quantite / 100)
     }
 });
+let protPers = proteines / recette.nb_personnes;
+
 let glucides = 0;
 ingredients.forEach((ing) => {
     if (ing.expand?.ingredient?.unitaire)
@@ -126,6 +134,7 @@ ingredients.forEach((ing) => {
         glucides += ing.expand.ingredient.glucides * (ing.quantite / 100)
     }
 });
+let gluPers = glucides / recette.nb_personnes;
 
 const nb_com = commentaires.length;
 
@@ -190,16 +199,24 @@ const nb_com = commentaires.length;
                 <div class="flex justify-between place-items-center w-9/10 mx-auto mb-2.5">
                     <h2 class="w-9/10 mx-auto">Ingrédients</h2>
                     <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
-                        <button class="flex-1"><Moins /></button>
-                        <button class="grow whitespace-nowrap bg-bleu text-beige h-full">{recette.nb_personnes} personnes</button>
-                        <button class="flex-1"><Plus /></button>
+                        <button id="moins" class="flex-1"><Moins /></button>
+                        <button id="nb-pers" class="grow whitespace-nowrap bg-bleu text-beige h-full">{nbPers} personnes</button>
+                        <button id="plus" class="flex-1"><Plus /></button>
                     </div>
                 </div>
                 <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
                     {
                         ingredients.map((ing) => (
                         <li>{ing.expand?.ingredient?.nom}</li>
-                        <li class="justify-self-end">{ing.quantite}{ing.unite}</li>
+                        <li class="justify-self-end">
+                            <span
+                                class="ingredient-qty"
+                                data-qty={ing.quantite}
+                                data-unit={ing.unite}
+                            >
+                                {(ing.quantite / recette.nb_personnes) * nbPers}{ing.unite}
+                            </span>
+                        </li>
                         ))
                     }
                 </ul>
@@ -211,13 +228,13 @@ const nb_com = commentaires.length;
             <div>
                 <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
                     <li>Calories</li>
-                    <li class="justify-self-end">{ Math.round(calories) } Kcal</li>
+                    <li id="calories-value" class="justify-self-end">{ Math.round((calPers) * nbPers) } Kcal</li>
                     <li>Protéines</li>
-                    <li class="justify-self-end">{ Math.round(proteines) } g</li>
+                    <li id="proteines-value" class="justify-self-end">{ Math.round((protPers) * nbPers) } g</li>
                     <li>Glucides</li>
-                    <li class="justify-self-end">{ Math.round(glucides) } g</li>
+                    <li id="glucides-value" class="justify-self-end">{ Math.round((gluPers) * nbPers) } g</li>
                     <li>Matières grasses</li>
-                    <li class="justify-self-end">{ Math.round(mat_grasses) } g</li>
+                    <li id="matgrasses-value" class="justify-self-end">{ Math.round((matGPers) * nbPers) } g</li>
                 </ul>
             </div>
         </section>
@@ -278,4 +295,45 @@ const nb_com = commentaires.length;
             )}
         </section>
     </main>
+
+    <script is:inline define:vars={{ nbPers, calPers, protPers, gluPers, matGPers }}>
+        const btnPlus = document.getElementById("plus");
+        const btnMoins = document.getElementById("moins");
+        const nbPersDisplay = document.getElementById("nb-pers");
+        const caloriesValue = document.getElementById("calories-value");
+        const proteinesValue = document.getElementById("proteines-value");
+        const glucidesValue = document.getElementById("glucides-value");
+        const matGrassesValue = document.getElementById("matgrasses-value");
+        let currentNbPers = nbPers;
+
+        const render = () => {
+            if (nbPersDisplay) nbPersDisplay.textContent = `${currentNbPers} personnes`;
+
+            document.querySelectorAll('.ingredient-qty').forEach((el) => {
+                const baseQty = Number(el.getAttribute('data-qty') || 0);
+                const unit = el.getAttribute('data-unit') || '';
+                const scaled = (baseQty / nbPers) * currentNbPers;
+                el.textContent = `${Math.round(scaled * 100) / 100}${unit}`;
+            });
+
+            if (caloriesValue) caloriesValue.textContent = `${Math.round(calPers * currentNbPers)} Kcal`;
+            if (proteinesValue) proteinesValue.textContent = `${Math.round(protPers * currentNbPers)} g`;
+            if (glucidesValue) glucidesValue.textContent = `${Math.round(gluPers * currentNbPers)} g`;
+            if (matGrassesValue) matGrassesValue.textContent = `${Math.round(matGPers * currentNbPers)} g`;
+        };
+
+        btnPlus?.addEventListener('click', () => {
+            currentNbPers += 1;
+            render();
+        });
+
+        btnMoins?.addEventListener('click', () => {
+            if (currentNbPers > 1) {
+                currentNbPers -= 1;
+                render();
+            }
+        });
+
+        render();
+    </script>
 </Layout>

@@ -17,9 +17,9 @@ const coachsFilter = search
     || i.pseudo.toLowerCase().includes(search.toLowerCase())) 
 : [];
 ---
-<Layout titre="Coachs">
+<Layout titre="Coachs" color="beige">
     <h1 class="mt-20">Coachs</h1>
-    <form action="/coachs" method="get" class="flex w-8/10 h-fit justify-center place-items-center place-self-center">
+    <form action="/coachs" method="get" class="flex w-8/10 h-fit justify-center place-items-center place-self-center mb-20">
         <input 
             type="search"
             name="s"
@@ -34,16 +34,15 @@ const coachsFilter = search
             Chercher
         </button>
     </form>
-
     {search ? (
         coachsFilter.length === 0 ? (
             <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
                 Aucun coach disponible pour le moment.
             </p>
             ):(
-            <ul class="grid grid-cols-1 place-self-center justify-self-center *:my-5">
+            <ul class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
                 {coachsFilter.map((coach) => (
-                    <li class="place-self-center justify-self-center mx-auto"><CardCoach coach={coach} /></li>
+                    <li class="w-fit mx-auto"><CardCoach coach={coach} /></li>
                 ))}
             </ul>
             )
@@ -53,11 +52,10 @@ const coachsFilter = search
             Aucun coach disponible pour le moment.
         </p>
     ) : (
-        <ul class="grid grid-cols-1 place-self-center justify-self-center *:my-5">
+        <ul class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
             {coachs.map((coach) => (
-                <li class="place-self-center justify-self-center mx-auto"><CardCoach coach={coach} /></li>
+                <li class="w-fit mx-auto"><CardCoach coach={coach} /></li>
             ))}
         </ul>
     ))}
-    
 </Layout>

@@ -1,0 +1,45 @@
+---
+import type { IngredientsResponse } from '../pocketbase-types'
+import ImgPb from "./ImgPb.astro";
+
+interface Props {
+    ing: IngredientsResponse,
+}
+const { ing } = Astro.props;
+---
+<li class="bg-beige border border-bleu rounded-xl overflow-hidden h-full hover:-translate-y-0.5 transition-all duration-100">
+    <a href={`/ingredients/${ing.id}`}>
+        <ImgPb
+            record={ing}
+            image={ing.image}
+            alt={`image de ${ing.nom}`}
+            classPicture="h-48 w-full"
+            classImg="h-full w-full object-cover"
+        />
+        <div class="p-4 *:my-1.5">
+            <h2 class="font-rampart text-2xl text-bleu">{ing.nom || "Ingrédient"}</h2>
+            <p class="font-bold text-bleu">{ing.type || "Type non défini"}</p>
+            <div class="border border-bleu rounded-lg p-2.5 bg-beige">
+                <p class="font-bold text-bleu mb-2">Valeurs nutritionnelles</p>
+                <ul class="grid grid-cols-2 gap-2 text-sm">
+                    <li class="bg-beige rounded-md p-2">
+                        <p class="text-bleu font-bold">Calories</p>
+                        <p>{ing.calories ?? 0} kcal</p>
+                    </li>
+                    <li class="bg-beige rounded-md p-2">
+                        <p class="text-bleu font-bold">Matières grasses</p>
+                        <p>{ing.mat_grasses ?? 0} g</p>
+                    </li>
+                    <li class="bg-beige rounded-md p-2">
+                        <p class="text-bleu font-bold">Protéines</p>
+                        <p>{ing.proteines ?? 0} g</p>
+                    </li>
+                    <li class="bg-beige rounded-md p-2">
+                        <p class="text-bleu font-bold">Glucides</p>
+                        <p>{ing.glucides ?? 0} g</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </a>
+</li>

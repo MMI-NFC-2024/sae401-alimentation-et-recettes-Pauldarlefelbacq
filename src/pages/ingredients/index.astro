@@ -1,10 +1,22 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import CardIngredients from "../../components/CardIngredients.astro";
 export const prerender = false;
 
-const ingredients = await Astro.locals.pb.collection("Ingredients").getFullList;
+const ingredients = await Astro.locals.pb.collection("Ingredients").getFullList();
 ---
-<Layout titre="Ingrédients">
-    <h1>Liste des ingrédients</h1>
-    
+<Layout titre="Ingrédients" color="beige">
+    <h1 class="mt-20">Liste des ingrédients</h1>
+
+    {ingredients.length === 0 ? (
+        <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
+            Aucun ingrédient disponible pour le moment.
+        </p>
+    ) : (
+        <ul class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12">
+            {ingredients.map((ing) => (
+                <CardIngredients ing={ing} />
+            ))}
+        </ul>
+    )}
 </Layout>
