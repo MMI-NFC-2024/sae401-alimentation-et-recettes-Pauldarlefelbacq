@@ -4,7 +4,7 @@ import CardCommentaireCoach from "../../components/CardCommentaireCoach.astro";
 import ImgPb from "../../components/ImgPb.astro";
 import ProgressBar from "../../components/Progress_bar.astro";
 import Layout from "../../layouts/Layout.astro";
-import { UsersSpecialisationOptions, type CommentairesCoachResponse, type FicheCoachResponse, type UsersResponse } from "../../pocketbase-types";
+import { UsersSpecialisationOptions, type CommentairesCoachResponse, type CommentairesResponse, type FicheCoachResponse, type UsersResponse } from "../../pocketbase-types";
 
 type CommentaireCoachWithUser = CommentairesCoachResponse & {
     expand?: {
@@ -38,6 +38,20 @@ const nb_com = commentaires.length;
 if (Astro.request.method === "POST") 
 {
     const data = await Astro.request.formData();
+    if (data.has("delete")) 
+    {
+        try
+        {
+            const id = data.get("recette") as string;
+
+            await Astro.locals.pb.collection("Recettes").delete(id);
+            return Astro.redirect(`/profil`, 303);
+        }catch(e) {
+        if (e instanceof Error) {
+        console.error("Delete error:", e.message);
+            }
+        }
+    }
     try 
     {
         const name = data.get("name") as string;
@@ -66,10 +80,49 @@ if (Astro.request.method === "POST")
     }catch(e) {
         if (e instanceof Error) {
         console.error(e.message);
-    }
+        }
     }
 }
 
+const recettesUser = await Astro.locals.pb.collection("Recettes").getFullList({
+    expand: 'user',
+    filter: `user = "${user.id}"`
+});
+
+const recetteStats: Record<string, { moyenne: number; nbAvis: number }> = {};
+
+recettesUser.forEach((recette) => {
+    recetteStats[recette.id] = { moyenne: 0, nbAvis: 0 };
+});
+if (recettesUser.length > 0) {
+    const recetteFilter = recettesUser
+        .map((recette) => `recette = "${recette.id}"`)
+        .join(" || ");
+
+    const commentairesRecettes = await Astro.locals.pb.collection("Commentaires").getFullList<CommentairesResponse>({
+        filter: recetteFilter,
+    });
+
+    const sums: Record<string, { total: number; count: number }> = {};
+
+    commentairesRecettes.forEach((commentaire) => {
+        if (!commentaire.recette) return;
+
+        if (!sums[commentaire.recette]) {
+            sums[commentaire.recette] = { total: 0, count: 0 };
+        }
+
+        sums[commentaire.recette].total += Number(commentaire.note) || 0;
+        sums[commentaire.recette].count += 1;
+    });
+
+    Object.entries(sums).forEach(([recetteId, value]) => {
+        recetteStats[recetteId] = {
+            moyenne: value.count > 0 ? Math.round((value.total / value.count) * 10) / 10 : 0,
+            nbAvis: value.count,
+        };
+    });
+}
 ---
 <Layout titre={`Profil ${user.name || user.pseudo}`} color="beige">
     <main class="mt-12 *:my-5">
@@ -95,6 +148,9 @@ if (Astro.request.method === "POST")
         <div class="flex justify-around">
             <button id="edit-user" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
                 Editer le profil
+            </button>
+            <button id="recettes-user" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
+                Vos recettes
             </button>
             <a href="/authpassword" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
                 Se déconnecter
@@ -221,11 +277,53 @@ if (Astro.request.method === "POST")
                 </div>
             </>
         )}
+
+        <div id="recettes" class="hidden bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto max-h-72 overflow-auto">
+            <h2>Vos recettes</h2>
+            {recettesUser.length === 0 ? (
+                <p>Vous n'aves pas encore posté de recette, pourquoi pas <a href="/recettes/add" class="text-bleu underline hover:decoration-0">commencer maintenant</a> ?</p>
+            ):(
+                <ul class="*:my-2.5">
+                    {recettesUser.map((recette) => (
+                        <li class="bg-beige border border-bleu rounded-xl p-3">
+                            <div class="flex flex-wrap justify-between gap-2 place-items-center">
+                                <a href={`/recettes/${recette.id}`} class="text-bleu text-xl font-bold underline hover:decoration-0">{recette.titre}</a>
+                                <div class="text-right">
+                                    <p>{recetteStats[recette.id]?.nbAvis ?? 0} avis</p>
+                                    <p class="font-bold text-bleu">{recetteStats[recette.id]?.moyenne ?? 0}/5</p>
+                                </div>
+                            </div>
+                            <div class="*:my-2">
+                                <a href={`recettes/edit/${recette.id}`} class="bg-bleu text-beige border p-2 rounded-xl hover:bg-beige hover:text-bleu">Editer la recette</a>
+                                <form method="post">
+                                    <input type="hidden" name="recette" value={recette.id}/>
+                                    <input type="hidden" name="delete" value="true">
+                                    <button type="submit" class="text-beige bg-red-400 border p-2 rounded-xl hover:text-red-400 hover:bg-beige">Supprimer</button>
+                                </form>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+
     </main>
     <script>
         const fenetreEditUser = document.getElementById('edit-profile-user');
         const btnEditUser = document.getElementById('edit-user');
         const btnCloseUser = document.getElementById('closeUser');
+
+        const btnRecettes = document.getElementById("recettes-user");
+        const fenetreRecettes = document.getElementById("recettes");
+
+        btnRecettes?.addEventListener('click', () => {
+            if (
+                fenetreRecettes?.classList.contains("hidden")) 
+            {
+                fenetreRecettes?.classList.remove("hidden");
+            }
+            else {fenetreRecettes?.classList.add("hidden")}
+        })
 
         btnEditUser?.addEventListener('click', () => {
             fenetreEditUser?.classList.remove('opacity-0', 'pointer-events-none');

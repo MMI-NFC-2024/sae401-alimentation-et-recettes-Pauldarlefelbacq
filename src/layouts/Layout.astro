@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import grid from "../assets/grid_pattern.svg";
 import Header from './Header.astro';
+import Footer from './Footer.astro';
 
 interface Props {
 	titre: string,
@@ -20,8 +21,9 @@ const { titre, color="beige" } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>Spoonful | { titre }</title>
 	</head>
-	<body class=`bg-[url(/grid_pattern.svg)] bg-repeat bg-${color}`>
+	<body class=`bg-[url(/grid_pattern.svg)] bg-repeat bg-${color} min-h-lvh`>
 		<Header color={color} />
 		<slot />
+		<Footer color={color} />
 	</body>
 </html>

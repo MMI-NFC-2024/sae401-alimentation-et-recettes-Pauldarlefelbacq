@@ -13,6 +13,10 @@
 }
 
 @layer base {
+    * {
+        font-family: var(--font-comforta);
+    }
+
     h1 {
         font-family: var(--font-rampart);
         color: var(--color-bleu);
