@@ -3,11 +3,17 @@ import CardCommentaireCoach from "../../components/CardCommentaireCoach.astro";
 import ImgPb from "../../components/ImgPb.astro";
 import ProgressBar from "../../components/Progress_bar.astro";
 import Layout from "../../layouts/Layout.astro";
-import { UsersSpecialisationOptions, type CommentairesCoachResponse, type CommentairesResponse, type FicheCoachResponse, type UsersResponse } from "../../pocketbase-types";
+import { UsersSpecialisationOptions, type CommentairesCoachResponse, type CommentairesResponse, type FavoriResponse, type FicheCoachResponse, type RecettesResponse, type UsersResponse } from "../../pocketbase-types";
 
 type CommentaireCoachWithUser = CommentairesCoachResponse & {
     expand?: {
         user?: UsersResponse;
+    };
+};
+
+type FavoriWithRecette = FavoriResponse & {
+    expand?: {
+        recette?: RecettesResponse;
     };
 };
 
@@ -51,6 +57,22 @@ if (Astro.request.method === "POST")
             }
         }
     }
+
+    if (data.has("unfavorite")) 
+    {
+        try {
+            const favoriId = data.get("favori") as string;
+            if (favoriId) {
+                await Astro.locals.pb.collection("Favori").delete(favoriId);
+            }
+            return Astro.redirect(`/profil`, 303);
+        } catch (e) {
+            if (e instanceof Error) {
+                console.error("Unfavorite error:", e.message);
+            }
+        }
+    }
+
     try 
     {
         const name = data.get("name") as string;
@@ -122,36 +144,81 @@ if (recettesUser.length > 0) {
         };
     });
 }
+
+const recettesFavUser = await Astro.locals.pb.collection("Favori").getFullList<FavoriWithRecette>({
+    expand: "recette",
+    filter: `user = "${user.id}"`
+})
+
+const favRecetteStats: Record<string, { moyenne: number; nbAvis: number }> = {};
+const favRecetteIds = recettesFavUser
+    .map((favori) => favori.expand?.recette?.id)
+    .filter((id): id is string => Boolean(id));
+
+if (favRecetteIds.length > 0) {
+    const favFilter = favRecetteIds
+        .map((recetteId) => `recette = "${recetteId}"`)
+        .join(" || ");
+
+    const commentairesFavRecettes = await Astro.locals.pb.collection("Commentaires").getFullList<CommentairesResponse>({
+        filter: favFilter,
+    });
+
+    const favSums: Record<string, { total: number; count: number }> = {};
+
+    commentairesFavRecettes.forEach((commentaire) => {
+        if (!commentaire.recette) return;
+
+        if (!favSums[commentaire.recette]) {
+            favSums[commentaire.recette] = { total: 0, count: 0 };
+        }
+
+        favSums[commentaire.recette].total += Number(commentaire.note) || 0;
+        favSums[commentaire.recette].count += 1;
+    });
+
+    Object.entries(favSums).forEach(([recetteId, value]) => {
+        favRecetteStats[recetteId] = {
+            moyenne: value.count > 0 ? Math.round((value.total / value.count) * 10) / 10 : 0,
+            nbAvis: value.count,
+        };
+    });
+}
 ---
 <Layout titre={`Profil ${user.name || user.pseudo}`} color="beige">
     <main class="mt-12 *:my-5">
-        <div class="flex bg-beige border border-bleu rounded-xl w-9/10 mx-auto p-2 place-items-center justify-around">
-            <div class="h-42 w-auto">
-                <ImgPb
-                    record={user}
-                    image={user.avatar}
-                    alt={`avatar de ${user.name || user.pseudo}`}
-                    classPicture="w-full h-full"
-                    classImg="w-full h-full object-cover rounded-full"
-                />
+        <div class="flex flex-col bg-beige border border-bleu rounded-xl w-9/10 mx-auto p-2 place-items-center justify-around">
+            <div class="flex">
+                <div class="h-42 w-auto">
+                    <ImgPb
+                        record={user}
+                        image={user.avatar}
+                        alt={`avatar de ${user.name || user.pseudo}`}
+                        classPicture="w-full h-full"
+                        classImg="w-full h-full object-cover rounded-full"
+                    />
+                </div>
+                <div class="flex flex-col h-fit *:my-1">
+                    <p class="font-rampart text-2xl text-bleu">{user.surname} {user.name}</p>
+                    <p class="text-base">@{user.pseudo}</p>
+                    {user.coach && (
+                        <p class=" text-bleu font-bold">Coach</p>
+                    )}
+                </div>
             </div>
-            <div class="flex flex-col h-fit *:my-1">    
-                <p class="font-rampart text-2xl text-bleu">{user.surname} {user.name}</p>
-                <p class="text-base">@{user.pseudo}</p>
-                {user.coach && (
-                    <p class=" text-bleu font-bold">Coach</p>
-                )}
-            </div>
-        </div>
-
-        <div class="flex justify-around">
             <button id="edit-user" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
                 Editer le profil
             </button>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 justify-around">
             <button id="recettes-user" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
                 Vos recettes
             </button>
-            <a href="/authpassword" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
+            <button id="recettes-user-fav" class="block bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-3 mx-auto">
+                Vos favoris
+            </button>
+            <a href="/authpassword" class="block bg-bleu text-red-400 border rounded-xl cursor-pointer hover:bg-red-400 hover:text-beige transition-all duration-100 p-3 mx-auto">
                 Se déconnecter
             </a>
         </div>
@@ -237,6 +304,39 @@ if (recettesUser.length > 0) {
             <p class="text-bleu font-bold mt-2">Utilisateur depuis: <span class="font-normal">{new Date(user.created).toLocaleDateString('fr-FR')}</span></p>
         </div>
 
+        <div id="recettes-fav" class="hidden bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto max-h-72 overflow-auto">
+            <h2>Vos favoris</h2>
+            {recettesFavUser.length === 0 ? (
+                <p>Vous n'avez pas encore ajouté de recette en favoris.</p>
+            ):(
+                <ul class="*:my-2.5">
+                    {recettesFavUser.map((favori) => {
+                        const recetteFav = favori.expand?.recette;
+                        if (!recetteFav) return null;
+
+                        return (
+                        <li class="bg-beige border border-bleu rounded-xl p-3">
+                            <div class="flex flex-wrap justify-between gap-2 place-items-center">
+                                <a href={`/recettes/${recetteFav.id}`} class="text-bleu text-xl font-bold underline hover:decoration-0">{recetteFav.titre}</a>
+                                <div class="text-right">
+                                    <p>{favRecetteStats[recetteFav.id]?.nbAvis ?? 0} avis</p>
+                                    <p class="font-bold text-bleu">{favRecetteStats[recetteFav.id]?.moyenne ?? 0}/5</p>
+                                </div>
+                            </div>
+                            <div class="*:my-2">
+                                <form method="post">
+                                    <input type="hidden" name="favori" value={favori.id}/>
+                                    <input type="hidden" name="unfavorite" value="true"/>
+                                    <button type="submit" class="text-beige bg-red-400 border p-2 rounded-xl hover:text-red-400 hover:bg-beige">Retirer des favoris</button>
+                                </form>
+                            </div>
+                        </li>
+                        );
+                    })}
+                </ul>
+            )}
+        </div>
+
         <div id="recettes" class="hidden bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto max-h-72 overflow-auto">
             <h2>Vos recettes</h2>
             {recettesUser.length === 0 ? (
@@ -313,6 +413,18 @@ if (recettesUser.length > 0) {
 
         const btnRecettes = document.getElementById("recettes-user");
         const fenetreRecettes = document.getElementById("recettes");
+
+        const btnRecettesFav = document.getElementById("recettes-user-fav");
+        const fenetreRecettesFav = document.getElementById("recettes-fav");
+
+        btnRecettesFav?.addEventListener('click', () => {
+            if (
+                fenetreRecettesFav?.classList.contains("hidden")) 
+            {
+                fenetreRecettesFav?.classList.remove("hidden");
+            }
+            else {fenetreRecettesFav?.classList.add("hidden")}
+        })
 
         btnRecettes?.addEventListener('click', () => {
             if (
