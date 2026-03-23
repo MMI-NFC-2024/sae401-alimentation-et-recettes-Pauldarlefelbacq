@@ -5,6 +5,7 @@ import { TpsTotal } from "../utils/helper";
 import Button from './Button.astro';
 import ProgressBar from './Progress_bar.astro';
 import ImgPb from './ImgPb.astro';
+import Heart from "../assets/heart.svg";
 
 type Props= {
     recette: RecettesResponse
@@ -19,6 +20,13 @@ const moyenne = commentaires.length > 0
     ? (Math.round((commentaires.reduce((sum, r) => sum + r.note, 0) / commentaires.length) * 10)) / 10
     : 0;
 const nb_com = commentaires.length;
+const userId = Astro.locals.pb.authStore.record?.id;
+const isFavorite = userId
+    ? (await Astro.locals.pb.collection("Favori").getList(1, 1, {
+        filter: `user = "${userId}" && recette = "${recette.id}"`
+    })).items.length > 0
+    : false;
+
 ---
 <a href=`/recettes/${recette.id}`
     class="bg-beige w-100 h-full grid grid-cols-2 rounded-[10px] border border-bleu overflow-auto"
@@ -38,13 +46,17 @@ const nb_com = commentaires.length;
             </div>
         </div>
     </div>
-    <div class="h-full">
+    <div class="relative h-full">
         <ImgPb
             record={recette}
             image={recette.image}
             alt={`image de ${recette.titre}`}
             classPicture="w-full h-full"
             classImg="w-full h-full object-cover"
+        />
+        <Heart
+            class={`absolute top-2 right-2 size-10 **:stroke-bleu ${isFavorite ? "**:fill-beige": " **:stroke-bleu"
+            }`}
         />
     </div>
 </a>

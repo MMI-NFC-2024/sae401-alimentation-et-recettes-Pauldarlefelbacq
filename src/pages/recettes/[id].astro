@@ -199,9 +199,9 @@ const nb_com = commentaires.length;
                 <div class="flex justify-between place-items-center w-9/10 mx-auto mb-2.5">
                     <h2 class="w-9/10 mx-auto">Ingrédients</h2>
                     <div class="flex border w-fit place-items-center gap-1 *:px-1.5 *:py-1 rounded-lg">
-                        <button id="moins" class="flex-1"><Moins /></button>
+                        <button id="moins" class="flex-1 cursor-pointer"><Moins /></button>
                         <button id="nb-pers" class="grow whitespace-nowrap bg-bleu text-beige h-full">{nbPers} personnes</button>
-                        <button id="plus" class="flex-1"><Plus /></button>
+                        <button id="plus" class="flex-1 cursor-pointer"><Plus /></button>
                     </div>
                 </div>
                 <ul class="grid grid-cols-2 bg-beige w-9/10 mx-auto p-3.5 border border-bleu rounded-xl">
@@ -281,7 +281,7 @@ const nb_com = commentaires.length;
                         <textarea 
                             name="contenu"
                             rows="5"
-                            class="bg-beige border-4 rounded-xl border-vert font-comforta"
+                            class="bg-beige border-4 rounded-xl border-vert font-comforta p-2"
                             required
                         />
                     <button 
