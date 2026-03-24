@@ -49,5 +49,9 @@ Paul Darle-Felbacq
 
  - Script de déploiement basique [deploy.yaml](./.github/workflows/deploy.yaml)
 
+# IA
+
+ - utilisé sur les filtres des recettes (pour les combiner avec les params de la recherche)4
+ - Aussi utilisé pour le footer (mise en forme surtout)
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/ymdhk8vP)

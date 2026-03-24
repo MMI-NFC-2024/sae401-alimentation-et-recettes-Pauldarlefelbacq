@@ -44,12 +44,16 @@ if (coachs.items.length > 0) {
 }
 ---
 <Layout titre = "Accueil" color="beige">
-	<div class="h-lvh">
-		<h1 class="text-9xl text-bleu text-left w-9/10 mt-24 md:text-[13.75rem]">Envie de mieux manger</h1>
-		<img class="mx-auto mt-20" src={Arrow.src} alt="fleche vers le bas" />
-	</div>
-	<section>
-		<h1>Alors vous êtes au bon endroit</h1>
+	<section class="min-h-[72svh] md:min-h-[85svh] w-9/10 mx-auto flex flex-col justify-between py-10 md:py-16">
+		<h1 class="text-bleu text-left font-bold leading-[0.95] text-[clamp(4rem,13vw,13.75rem)] max-w-[12ch]">
+			Envie de mieux manger
+		</h1>
+		<div class="pt-8 md:pt-12 flex justify-center">
+			<img class="w-8 md:w-10 h-auto" src={Arrow.src} alt="fleche vers le bas" />
+		</div>
+	</section>
+	<section class="w-9/10 mx-auto">
+		<h2 class="text-xl md:text-2xl lg:text-3xl">Alors vous êtes au bon endroit</h2>
 	</section>
 
 	<section>
@@ -58,7 +62,7 @@ if (coachs.items.length > 0) {
 			<button
 				id="home-carousel-prev"
 				type="button"
-				class="lg:hidden absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-bleu text-beige w-10 h-10 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100"
+				class="lg:hidden absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-bleu text-beige size-32 rounded-full border hover:bg-beige hover:text-bleu transition-all duration-100"
 				aria-label="Recette précédente"
 			>
 				‹
