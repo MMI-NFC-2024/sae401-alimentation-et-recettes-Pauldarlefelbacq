@@ -55,7 +55,6 @@ if (Astro.request.method === "POST")
 <Layout titre={`Coach ${coach.name}`} color="vert">
     <main class="mx-auto max-w-6xl *:my-6 md:*:my-8">
         <section class="justify-items-end place-self-center grid w-11/12 md:w-9/10 mx-auto">
-            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5 text-sm md:text-base">Coach</p>
             <ImgPb
                 record={coach}
                 image={coach.avatar}
@@ -65,16 +64,16 @@ if (Astro.request.method === "POST")
             />
         </section>
 
-        <section class="bg-beige border border-bleu rounded-xl p-3.5 md:p-5 w-11/12 md:w-9/10 mx-auto">
+        <section class="bg-vert border border-bleu rounded-xl p-3.5 md:p-5 w-11/12 md:w-9/10 mx-auto">
             <div class="flex flex-col md:flex-row md:justify-between md:place-items-center gap-4">
                 <div class="flex flex-col">    
                     <p class="font-rampart text-2xl text-bleu">{ coach.surname } { coach.name }</p>
                     <p class="text-base">@{ coach.pseudo }</p>
                     <p class="text-sm md:text-base">Spécialisation: <span class="font-bold text-bleu underline">{ coach.specialisation }</span></p>
                 </div>
-                <div class="flex flex-col md:place-items-center gap-2">
+                <div class="flex flex-col md:w-fit md:place-items-center gap-2">
                     <p class="font-bold">{ nb_com } avis</p>
-                    <div class="flex place-items-center justify-center gap-1.5">
+                    <div class="flex place-items-center justify-center md:w-full gap-1.5">
                         <ProgressBar note={moyenne} color="vert"/>
                         <p class="font-bold text-bleu">{ moyenne }/5</p>
                     </div>
@@ -106,24 +105,27 @@ if (Astro.request.method === "POST")
                 <h2 class="w-11/12 md:w-9/10 mx-auto">Poster un commentaire</h2>
                 <form method="POST" action={Astro.url.pathname} class="flex flex-col *:my-1.5 w-11/12 md:w-9/10 mx-auto">
                     <label>
-                        <span>Note</span>
-                        <input 
-                            type="number"
-                            name="note"
-                            max="5"
-                            min="0"
-                            class="bg-vert text-bleu font-comforta p-1.5 rounded-md"
-                            required
-                        />
+                        <div class="flex place-items-center gap-2 text-bleu bg-vert p-1.5 w-fit border border-beige rounded-xl">
+                            <span>Note</span>
+                            <input
+                                type="number"
+                                name="note"
+                                max="5"
+                                min="0"
+                                class="bg-vert text-bleu border font-comforta font-bold p-1.5 rounded-md"
+                                required
+                            />
+                            <p class="font-bold text-xl">/5</p>
+                        </div>
                     </label>
                         <textarea 
                             name="contenu"
-                            rows="5"
-                            class="bg-beige border-4 rounded-xl border-vert font-comforta p-2"
+                            rows="7"
+                            class="bg-vert border-4 rounded-xl border-beige font-comforta p-2"
                             required
                         />
                     <button 
-                        class="bg-vert text-bleu text-xl font-bold font-comforta w-fit py-3 px-5 rounded-xl mx-auto cursor-pointer hover:bg-bleu hover:text-vert transition duration-100"
+                        class="bg-bleu text-vert text-xl font-bold font-comforta w-fit py-3 px-5 border rounded-xl mx-auto cursor-pointer hover:bg-vert hover:text-bleu transition duration-100"
                     >
                         Envoyer
                     </button>

@@ -42,6 +42,7 @@ if (Astro.request.method === "POST")
         const recette = data.get("recette") as string;
 
         const ingredient_actuel = data.get("ingredient_actuel") as string;
+        const etape_actuelle = data.get("etape_actuelle") as string;
 
         const contenu = data.get("contenu") as string;
 
@@ -65,7 +66,12 @@ if (Astro.request.method === "POST")
                 contenu,
                 recette,
             })
-            return Astro.redirect(`/recettes/edit/${id}#etapes`, 303);
+            return Astro.redirect(`/recettes/edit/${id}`, 303);
+        }
+        else if (action === "suppr_etape")
+        {
+            await Astro.locals.pb.collection("Etapes_prep").delete(etape_actuelle);
+            return Astro.redirect(`/recettes/edit/${id}`, 303);
         }
     } catch (e)
     {
@@ -75,11 +81,10 @@ if (Astro.request.method === "POST")
         }
     }
 }
-
 ---
 <Layout titre="Édition recette">
 <main class="w-screen overflow-x-hidden">
-    <h1 class="fixed top-0 z-10">Partager une recette</h1>
+    <h1 class="fixed top-1/6 left-1/2 -translate-1/2 z-10">Partager une recette</h1>
     <div id="pageForm" class="flex w-[200vw] transition-transform duration-300 ease-in-out">
         <section class="w-screen shrink-0 min-h-screen flex items-center justify-center">
             <div class="w-9/10">
@@ -147,6 +152,12 @@ if (Astro.request.method === "POST")
                             <li class="flex flex-col justify-between bg-beige border border-bleu rounded-xl p-2 my-2.5">
                                 <p class="text-bleu font-bold underline">Étape {index + 1}</p>
                                 <p class="p-2 border-2 border-bleu rounded-xl mt-2.5">{e.contenu}</p>
+                                <form method="POST" action={Astro.url.pathname} class="mt-2.5 self-end">
+                                    <input type="hidden" name="recette" value={id} />
+                                    <input type="hidden" name="action" value="suppr_etape">
+                                    <input type="hidden" name="etape_actuelle" value={e.id}>
+                                    <button class="bg-red-500/80 text-beige font-bold text-sm p-1 rounded-full">Supprimer</button>
+                                </form>
                             </li>
                             ))}
                         </ul>
@@ -163,6 +174,11 @@ if (Astro.request.method === "POST")
                     <button class="ml-auto block bg-bleu text-beige px-2 py-0.5 rounded-xl">Ajouter</button>
                 </form>
             <button id="pageChangeBack" type="button" class="mt-4 mx-auto block bg-bleu text-beige p-3.5 rounded-xl">Retour</button>
+            <a class="grid bg-bleu text-beige p-2 border-2 rounded-xl ml-auto w-fit place-self-end font-bold" 
+                href={`/recettes/${id}`}
+            >
+                Enregistrer
+            </a>
         </section>
     </div>
 </main>

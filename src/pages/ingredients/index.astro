@@ -1,21 +1,47 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import CardIngredients from "../../components/CardIngredients.astro";
+import { IngredientsTypeOptions } from "../../pocketbase-types";
+
+const url = new URL(Astro.request.url);
+const search = url.searchParams.get("s") ?? "";
 
 const ingredients = await Astro.locals.pb.collection("Ingredients").getFullList();
+const ingredientsFilter = search ? ingredients.filter(i => i.nom.toLowerCase().includes(search.toLowerCase())) : [];
+const types = Object.values(IngredientsTypeOptions);
 ---
 <Layout titre="Ingrédients" color="beige">
     <h1 class="mt-20">Liste des ingrédients</h1>
 
+    <form action=`ingredients` method="get" class="flex w-fit gap-5">
+        <input 
+            type="search"
+            name="s"
+            value={search}
+            class="grid w-2/3 border-2 border-bleu rounded-lg bg-white my-5 mx-auto px-2 py-1"
+        />
+        <button type="submit" class="bg-bleu text-beige border p-2 rounded-xl cursor-pointer">Rechercher</button>
+    </form>
+
+    
+    
     {ingredients.length === 0 ? (
         <p class="bg-beige text-bleu border-2 border-bleu rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
             Aucun ingrédient disponible pour le moment.
         </p>
     ) : (
-        <ul class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12">
-            {ingredients.map((ing) => (
-                <CardIngredients ing={ing} />
-            ))}
-        </ul>
+        search ? (
+            <ul class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12">
+                {ingredientsFilter.map((ing) => (
+                    <CardIngredients ing={ing} />
+                ))}
+            </ul>
+        ) : (
+            <ul class="w-9/10 mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-12">
+                {ingredients.map((ing) => (
+                    <CardIngredients ing={ing} />
+                ))}
+            </ul>
+        )
     )}
 </Layout>
