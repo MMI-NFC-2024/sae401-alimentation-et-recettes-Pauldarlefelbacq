@@ -53,34 +53,35 @@ if (Astro.request.method === "POST")
 }
 ---
 <Layout titre={`Coach ${coach.name}`} color="vert">
-    <main class="mt-12 *:my-8">
-        <div class="flex bg-vert border border-beige rounded-xl w-9/10 mx-auto p-2 place-items-center justify-around">
-            <div class="h-42 w-auto">
-                <ImgPb
-                    record={coach}
-                    image={coach.avatar}
-                    alt={`avatar de ${coach.name || coach.pseudo}`}
-                    classPicture="w-full h-full"
-                    classImg="w-full h-full object-cover rounded-full"
-                />
-            </div>
-            <div class="flex flex-col h-fit justify-around">    
-                <p class="font-rampart text-2xl text-bleu">{ coach.surname } { coach.name }</p>
-                <p class="text-base">@{ coach.pseudo }</p>
-                <p class="text-center ">Spécialisation: <span class="font-bold text-bleu underline">{ coach.specialisation }</span></p>
-            </div>
-        </div>
+    <main class="mx-auto max-w-6xl *:my-6 md:*:my-8">
+        <section class="justify-items-end place-self-center grid w-11/12 md:w-9/10 mx-auto">
+            <p class="px-2.5 py-1 bg-beige w-fit border border-bleu rounded-lg mb-1.5 text-sm md:text-base">Coach</p>
+            <ImgPb
+                record={coach}
+                image={coach.avatar}
+                alt={`avatar de ${coach.name || coach.pseudo}`}
+                classPicture="w-full h-full mx-auto"
+                classImg="w-full h-[250px] md:h-[360px] object-cover rounded-xl"
+            />
+        </section>
 
-        <div class="bg-vert h-full flex flex-col justify-around rounded-[10px] border border-beige overflow-auto p-2 w-9/10 mx-auto *:flex-1 *:my-3">
-            <div class="flex w-9/10 mx-auto justify-around">
-                <p>{ nb_com } avis</p>
-                <div class="flex place-items-center justify-around *:mx-1.5 w-5/10">
-                    <ProgressBar note={moyenne} color="vert"/>
-                    <p>{ moyenne }/5</p>
+        <section class="bg-beige border border-bleu rounded-xl p-3.5 md:p-5 w-11/12 md:w-9/10 mx-auto">
+            <div class="flex flex-col md:flex-row md:justify-between md:place-items-center gap-4">
+                <div class="flex flex-col">    
+                    <p class="font-rampart text-2xl text-bleu">{ coach.surname } { coach.name }</p>
+                    <p class="text-base">@{ coach.pseudo }</p>
+                    <p class="text-sm md:text-base">Spécialisation: <span class="font-bold text-bleu underline">{ coach.specialisation }</span></p>
+                </div>
+                <div class="flex flex-col md:place-items-center gap-2">
+                    <p class="font-bold">{ nb_com } avis</p>
+                    <div class="flex place-items-center justify-center gap-1.5">
+                        <ProgressBar note={moyenne} color="vert"/>
+                        <p class="font-bold text-bleu">{ moyenne }/5</p>
+                    </div>
                 </div>
             </div>
-            <p>{coach.description}</p>
-        </div>
+            <p class="mt-3.5 md:mt-5">{coach.description}</p>
+        </section>
         <a
             href={fiche.lien}
             target="_blank"
@@ -90,25 +91,20 @@ if (Astro.request.method === "POST")
             Prendre rendez vous
         </a>
 
-        <div class="">
-            <h2>Commentaires</h2>
-            {commentaires.length === 0 ? (
-                <p class="bg-vert text-bleu border-2 rounded-xl mx-auto mb-12 p-1 text-center w-9/10">
-                    Aucun commentaires
-                </p>
-            ):(
-            <ul class="*:my-2">
-                {commentaires.map((com) => (
-                    <li><CardCommentaireCoach com={com}/></li>
-                ))}
-            </ul>
-            )}
-            
-        </div>
-        <div class="">
+        <section id="commentaires">
+            <h2 class="w-11/12 md:w-9/10 mx-auto">Commentaires</h2>
+            <div class="w-11/12 md:w-9/10 mx-auto *:my-5 md:grid md:grid-cols-2 md:gap-4 md:*:my-0">
+                {
+                    commentaires.map((com) => (
+                    <CardCommentaireCoach com={com} />
+                    ))
+                }
+            </div>
+        </section>
+        <section>
             {Astro.locals.pb.authStore.isValid ? (
-                <h2 class="w-9/10 mx-auto">Poster un commentaire</h2>
-                <form method="POST" action={Astro.url.pathname} class="flex flex-col *:my-1.5 w-9/10 mx-auto">
+                <h2 class="w-11/12 md:w-9/10 mx-auto">Poster un commentaire</h2>
+                <form method="POST" action={Astro.url.pathname} class="flex flex-col *:my-1.5 w-11/12 md:w-9/10 mx-auto">
                     <label>
                         <span>Note</span>
                         <input 
@@ -116,18 +112,18 @@ if (Astro.request.method === "POST")
                             name="note"
                             max="5"
                             min="0"
-                            class="bg-vert border text-bleu font-comforta p-1.5 rounded-md"
+                            class="bg-vert text-bleu font-comforta p-1.5 rounded-md"
                             required
                         />
                     </label>
                         <textarea 
                             name="contenu"
                             rows="5"
-                            class="bg-vert border-4 rounded-xl border-bleu font-comforta p-2"
+                            class="bg-beige border-4 rounded-xl border-vert font-comforta p-2"
                             required
                         />
                     <button 
-                        class="bg-vert text-bleu border text-xl font-bold font-comforta w-fit py-3 px-5 rounded-xl mx-auto cursor-pointer hover:bg-bleu hover:text-vert transition duration-100"
+                        class="bg-vert text-bleu text-xl font-bold font-comforta w-fit py-3 px-5 rounded-xl mx-auto cursor-pointer hover:bg-bleu hover:text-vert transition duration-100"
                     >
                         Envoyer
                     </button>
@@ -135,7 +131,6 @@ if (Astro.request.method === "POST")
             ) : (
                 <p>Il est nécéssaire de vous <a href="">connecter</a> pour poster un commentaire</p>
             )}
-        </div>
-    <!-- </div> -->
-</main>
+        </section>
+    </main>
 </Layout>

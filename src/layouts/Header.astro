@@ -11,6 +11,7 @@ const user = Astro.locals.pb.authStore;
             <li><a data-nav-link href="/">Accueil</a></li>
             <li><a data-nav-link href="/recettes">Recettes</a></li>
             <li><a data-nav-link href="/coachs">Coachs</a></li>
+            <li><a data-nav-link href="/ingredients">Ingrédients</a></li>
             {user.isValid ? (
                <li><a data-nav-link href="/profil">Profil</a></li> 
             ):(
