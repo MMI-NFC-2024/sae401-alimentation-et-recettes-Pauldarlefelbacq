@@ -1,0 +1,47 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout titre="À propos" color="beige">
+    <main class="w-9/10 mx-auto mt-12 space-y-6">
+        <section class="bg-beige border border-bleu rounded-xl p-5">
+            <h1 class="text-2xl text-bleu font-bold mb-2">À propos de Spoonful</h1>
+            <p>
+                Spoonful est un projet étudiant réalisé dans le cadre de la SAE401.
+                L'application permet de découvrir des recettes, consulter des ingrédients,
+                retrouver des coachs et gérer son profil nutritionnel.
+            </p>
+        </section>
+
+        <section id="conditions-utilisation" class="bg-beige border border-bleu rounded-xl p-5">
+            <h2 class="text-xl text-bleu font-bold mb-2">Conditions d'utilisation</h2>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>L'utilisation de la plateforme est réservée à un usage personnel et non commercial.</li>
+                <li>Chaque utilisateur est responsable des informations qu'il publie (recettes, commentaires, profil).</li>
+                <li>Les contenus offensants, trompeurs ou contraires à la loi peuvent être supprimés.</li>
+                <li>Le service est fourni dans un cadre pédagogique et peut évoluer sans préavis.</li>
+            </ul>
+        </section>
+
+        <section id="politique-confidentialite" class="bg-beige border border-bleu rounded-xl p-5">
+            <h2 class="text-xl text-bleu font-bold mb-2">Politique de confidentialité</h2>
+            <p class="mb-2">
+                Nous collectons uniquement les données nécessaires au fonctionnement du site
+                (compte utilisateur, préférences de profil, contenus publiés).
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Les données de compte servent à l'authentification et à la personnalisation de l'expérience.</li>
+                <li>Les informations de profil restent modifiables depuis la page profil.</li>
+                <li>Aucune revente de données personnelles n'est effectuée.</li>
+            </ul>
+        </section>
+
+        <section id="contact" class="bg-beige border border-bleu rounded-xl p-5">
+            <h2 class="text-xl text-bleu font-bold mb-2">Contact</h2>
+            <p>
+                Pour toute question sur le projet, vous pouvez contacter l'équipe de SpoonFul (Paul Darle-Felbacq)
+                via le repository GitHub du projet.
+            </p>
+        </section>
+    </main>
+</Layout>

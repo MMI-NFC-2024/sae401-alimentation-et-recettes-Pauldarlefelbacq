@@ -3,7 +3,7 @@ import CardCommentaireCoach from "../../components/CardCommentaireCoach.astro";
 import ImgPb from "../../components/ImgPb.astro";
 import ProgressBar from "../../components/Progress_bar.astro";
 import Layout from "../../layouts/Layout.astro";
-import { UsersSpecialisationOptions, type CommentairesCoachResponse, type CommentairesResponse, type FavoriResponse, type FicheCoachResponse, type RecettesResponse, type UsersResponse } from "../../pocketbase-types";
+import { UsersRegimeOptions, UsersSpecialisationOptions, type CommentairesCoachResponse, type CommentairesResponse, type FavoriResponse, type FicheCoachResponse, type RecettesResponse, type UsersResponse } from "../../pocketbase-types";
 
 type CommentaireCoachWithUser = CommentairesCoachResponse & {
     expand?: {
@@ -20,6 +20,7 @@ type FavoriWithRecette = FavoriResponse & {
 const user = Astro.locals.pb.authStore.record as UsersResponse & { id: string } | null;
 
 const specialisations = Object.values(UsersSpecialisationOptions);
+const regimes = Object.values(UsersRegimeOptions);
 
 if (!user) {
     return Astro.redirect(`/authpassword`, 303);
@@ -80,6 +81,7 @@ if (Astro.request.method === "POST")
         const email = data.get("email") as string;
         const description = data.get("description") as string;
         const pseudo = data.get("pseudo") as string;
+        const regime = data.get("regime") as string;
 
         const avatarInput = data.get("avatar");
         const avatar = avatarInput instanceof File && avatarInput.size > 0 ? avatarInput : undefined;
@@ -90,6 +92,7 @@ if (Astro.request.method === "POST")
             email,
             description,
             pseudo,
+            regime: regime || null,
         };
 
         if (avatar) {
@@ -154,6 +157,16 @@ const favRecetteStats: Record<string, { moyenne: number; nbAvis: number }> = {};
 const favRecetteIds = recettesFavUser
     .map((favori) => favori.expand?.recette?.id)
     .filter((id): id is string => Boolean(id));
+
+const recettesMemeRegime = user.regime
+    ? await Astro.locals.pb.collection("Recettes").getFullList<RecettesResponse>({
+        filter: `type = "${user.regime}"`,
+    })
+    : [];
+
+const recetteSuggestionRegime = recettesMemeRegime.length > 0
+    ? recettesMemeRegime[Math.floor(Math.random() * recettesMemeRegime.length)]
+    : null;
 
 if (favRecetteIds.length > 0) {
     const favFilter = favRecetteIds
@@ -263,6 +276,14 @@ if (favRecetteIds.length > 0) {
                         class="px-2 py-2 border-2 border-bleu bg-white rounded-lg mb-2.5"
                     />
 
+                    <label class="text-sm text-bleu mb-1">Régime alimentaire</label>
+                    <select name="regime" class="px-2 py-3 border-2 border-bleu bg-white rounded-lg mb-2.5">
+                        <option value="" selected={!user.regime}>Régime</option>
+                        {regimes.map((regime) => (
+                            <option value={regime} selected={user.regime === regime}>{regime}</option>
+                        ))}
+                    </select>
+
                     {user.coach && (
                         <div class="flex flex-col">
 
@@ -301,7 +322,30 @@ if (favRecetteIds.length > 0) {
 
         <div class="bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto">
             <p class="text-bleu font-bold">Email: <span class="font-normal">{user.email}</span></p>
+            <p class="text-bleu font-bold mt-2">Régime alimentaire: <span class="font-normal">{user.regime || 'Non renseigné'}</span></p>
             <p class="text-bleu font-bold mt-2">Utilisateur depuis: <span class="font-normal">{new Date(user.created).toLocaleDateString('fr-FR')}</span></p>
+        </div>
+
+        <div class="bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto">
+            <h2 class="text-bleu font-bold">Suggestion selon votre régime</h2>
+            {!user.regime ? (
+                <p class="mt-2">Renseignez votre régime alimentaire pour recevoir une suggestion de recette.</p>
+            ) : !recetteSuggestionRegime ? (
+                <p class="mt-2">Aucune recette {user.regime} n'est disponible pour le moment.</p>
+            ) : (
+                <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <p class="font-bold text-bleu">{recetteSuggestionRegime.titre}</p>
+                        <p class="text-sm">Type: {recetteSuggestionRegime.type}</p>
+                    </div>
+                    <a
+                        href={`/recettes/${recetteSuggestionRegime.id}`}
+                        class="bg-bleu text-beige border rounded-xl cursor-pointer hover:bg-beige hover:text-bleu transition-all duration-100 p-2"
+                    >
+                        Voir la recette
+                    </a>
+                </div>
+            )}
         </div>
 
         <div id="recettes-fav" class="hidden bg-beige rounded-[10px] border border-bleu p-4 w-9/10 mx-auto max-h-72 overflow-auto">

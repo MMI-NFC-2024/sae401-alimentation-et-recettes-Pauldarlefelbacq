@@ -13,12 +13,13 @@ const types = Object.values(IngredientsTypeOptions);
 <Layout titre="Ingrédients" color="beige">
     <h1 class="mt-20">Liste des ingrédients</h1>
 
-    <form action=`ingredients` method="get" class="flex w-fit gap-5">
+    <form action="ingredients" method="get" class="flex justify-center gap-5 mx-auto my-5">
         <input 
             type="search"
             name="s"
             value={search}
-            class="grid w-2/3 border-2 border-bleu rounded-lg bg-white my-5 mx-auto px-2 py-1"
+            placeholder="Rechercher"
+            class="border-2 border-bleu rounded-lg bg-white px-2 py-1"
         />
         <button type="submit" class="bg-bleu text-beige border p-2 rounded-xl cursor-pointer">Rechercher</button>
     </form>

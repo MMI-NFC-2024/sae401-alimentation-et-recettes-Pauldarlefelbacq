@@ -13,6 +13,7 @@ export enum Collections {
 	FicheCoach = "Fiche_coach",
 	Ingredients = "Ingredients",
 	Recettes = "Recettes",
+	TypeRegime = "Type_regime",
 	Authorigins = "_authOrigins",
 	Externalauths = "_externalAuths",
 	Mfas = "_mfas",
@@ -139,6 +140,15 @@ export type RecettesRecord = {
 	user?: RecordIdString
 }
 
+export type TypeRegimeRecord = {
+	created: IsoAutoDateString
+	explication?: string
+	id: string
+	nb_calorie?: number
+	nom?: string
+	updated: IsoAutoDateString
+}
+
 export type AuthoriginsRecord = {
 	collectionRef: string
 	created: IsoAutoDateString
@@ -210,6 +220,12 @@ export enum UsersSpecialisationOptions {
 	"mental" = "mental",
 	"motivation" = "motivation",
 }
+
+export enum UsersRegimeOptions {
+	"végétarienne" = "végétarienne",
+	"végan" = "végan",
+	"omnivore" = "omnivore",
+}
 export type UsersRecord = {
 	admin?: boolean
 	avatar?: FileNameString
@@ -222,6 +238,7 @@ export type UsersRecord = {
 	name?: string
 	password: string
 	pseudo?: string
+	regime?: UsersRegimeOptions
 	specialisation?: UsersSpecialisationOptions
 	surname?: string
 	tokenKey: string
@@ -237,6 +254,7 @@ export type FavoriResponse<Texpand = unknown> = Required<FavoriRecord> & BaseSys
 export type FicheCoachResponse<Texpand = unknown> = Required<FicheCoachRecord> & BaseSystemFields<Texpand>
 export type IngredientsResponse<Texpand = unknown> = Required<IngredientsRecord> & BaseSystemFields<Texpand>
 export type RecettesResponse<Texpand = unknown> = Required<RecettesRecord> & BaseSystemFields<Texpand>
+export type TypeRegimeResponse<Texpand = unknown> = Required<TypeRegimeRecord> & BaseSystemFields<Texpand>
 export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>
 export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRecord> & BaseSystemFields<Texpand>
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
@@ -255,6 +273,7 @@ export type CollectionRecords = {
 	Fiche_coach: FicheCoachRecord
 	Ingredients: IngredientsRecord
 	Recettes: RecettesRecord
+	Type_regime: TypeRegimeRecord
 	_authOrigins: AuthoriginsRecord
 	_externalAuths: ExternalauthsRecord
 	_mfas: MfasRecord
@@ -272,6 +291,7 @@ export type CollectionResponses = {
 	Fiche_coach: FicheCoachResponse
 	Ingredients: IngredientsResponse
 	Recettes: RecettesResponse
+	Type_regime: TypeRegimeResponse
 	_authOrigins: AuthoriginsResponse
 	_externalAuths: ExternalauthsResponse
 	_mfas: MfasResponse
